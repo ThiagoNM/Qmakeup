@@ -1,0 +1,231 @@
+/* https://khaledkzy.github.io/pixel-vh-vw-converter/ */
+/* ~~~~~~~~~~~~ ESTILO DEL HEADER ~~~~~~~~~~~~ */
+/* Estilo del logo de la barra de navegación */
+.navbar--logo{
+    height: 100%;
+    padding: 0%;
+}
+
+/* Estilo de la barra de navegación */
+.navbar--barra{
+    background-color: #272727;
+    padding: 0%;
+    font-size: 1.3vw;
+}
+
+/* Anchura de la barra de navegación */
+.nav-item{
+    padding: 3%;
+}
+
+/* Estilo de los botones de la barra de navegación*/
+.navbar-nav{
+    color: #6d9eeb;
+}
+
+
+/* ~~~~~~~~~~~~ ESTILO DEL BODY ~~~~~~~~~~~~ */
+body{
+    background-color: #bee7f4;
+    font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+}
+
+/* ~~~~~~~~~~~~ CONTENEDORES ~~~~~~~~~~~~ */
+/* Contenedor que contiene la bienvenido */
+.container__welcome{
+    position: relative;
+    text-align: center;
+}
+
+.container__welcome video{
+    width: 100%;
+}
+
+/* Texto encima de la imagen */
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ead1dc9c;
+    padding: 1%;
+}
+
+/* El contenedor para centrar todo */
+.container--king{
+    width: 85%;
+    margin: auto;
+}
+
+/* PRODUCTOS MEJOR VALORADOS */
+.container__top{
+    width: 80%;
+    margin: auto;
+    padding: 0.7%;
+    border-radius: 10px;
+    background-color: #6d9eeb;
+    margin-bottom: 5%;
+    padding-bottom: 1%;    
+}
+
+/* Contendor de los productos */
+.container__product{
+    background-color: #ead1dc;
+    width: 18%;
+    margin: 1%;
+    padding: 1%;
+    border-radius: 5px;
+    box-shadow: 10px 10px 10px rgba(41, 41, 41, 0.521);
+}
+
+.container__product:hover{
+    -webkit-transform:scale(1.1);
+    transform:scale(1.1);
+    border: 3px solid #bee7f4;
+}
+
+/* Contendor con las tiendas con las que trabajamos */
+.continer--business{
+    display: flex;
+    justify-content: space-around;
+    width: 70%;
+    margin: auto;
+    margin-bottom: 2%;
+}
+
+.continer--business img{
+    width: 20%;
+}
+/* Contenedor donde se muestran las valoraciones de un producto */
+.container--starsProduct{
+    font-size: 2w;
+}
+.container--starsProduct i {
+    margin-right: 1%;
+}
+
+/* ~~~~ ESTILOS DE LOS BOTONES ~~~~ */
+/* Boton de buscar producto */
+.boton-search{
+    border: #6d9eeb solid 1px;
+    color: black;
+    background-color: #6d9eeb;
+}
+
+/* Boton de barra de navegación */
+.boton-nav{
+    color: #6d9eeb;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.boton-nav:hover{
+    transition: 0.5s;
+    background-color: #ead1dc;
+}
+
+/* Boton de la bienvenido */
+.boton-welcome{
+    background-color: #ead1dc;
+    color: #6d9eeb;
+    box-shadow: 5px 5px 5px black ;
+    border-radius: 5px;
+    border: #6d9eeb solid 1px;
+    padding: 1%;
+    font-size: 1.5vw;
+}
+
+
+/* ~~~~ ESTILOS DE LOS TEXTOS Y TITULOS ~~~~ */
+/* Estilo predeterminado del titulo */
+.title{
+    color: #272727;
+    font-size: 5vw;
+}
+
+/* Titulo o nombre del productp */
+.title--product{
+    font-size: 1.5vw; 
+    color: #6d9eeb;
+}
+
+/* Titulo del contendor */
+.title--container{
+    font-size: 1.6vw; 
+    font-weight: bold;
+
+}
+
+/* Titlo más pequeño */
+.title--question{
+    font-size: 1vw; 
+    text-align: center;
+}
+
+
+/* Estilo predeterminado del texto */
+.text{
+    font-size: 1.5vw;
+}
+
+/* Texto de los productos*/
+.text--product
+{
+    font-size: 1vw;
+}
+
+
+/* ~~~~~~~~~~~~ ESTILOS DE IMAGENES ~~~~~~~~~~~~ */
+.imgP{
+    width: 100%;
+}
+
+/* Estilo predeterminado del los iconos */
+.icono{
+    color:#6d9eeb;
+    font-size: 1.5vw;
+}
+
+/* Estilo de icono del footer */
+.icono--footer{
+    font-size: 2vw;
+}
+
+/* Icono de la barra de navegación */
+.icono--navbar{
+    margin-right: 2%;
+}
+
+/* Estilo del logo */
+.logo{
+    width: 100%;        
+    float: left;
+}
+
+
+/* ~~~~~~~~~~~~ ESTILO DEL FOOTER ~~~~~~~~~~~~ */
+footer{
+    display: flex;
+    justify-content: space-around;
+    background-color: #272727;
+    color: #5e6268;
+    text-align: center;
+}
+
+/* Estilo del label del footer*/
+.labelFooter{
+    margin-top: 0.5%;
+    color: #6d9eeb;
+    font-size: 1.5vw;
+}
+
+
+/* ~~~~~~~~~~~~ RESPOSIVE ~~~~~~~~~~~~ */
+@media (max-width: 991px) {
+    .navbar--logo {
+        width: 20%;
+    }
+    .icono {
+        font-size: 1.5vw;
+    }
+}
