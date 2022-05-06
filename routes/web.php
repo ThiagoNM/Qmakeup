@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,22 +15,40 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('layouts/home');
+    return view('home');
 });
-Route::get('/login', function () {
-    return view('layouts/login');
-});
+
 Route::get('/marcas', function () {
-    return view('layouts/marcas');
+    return view('marcas');
 });
-Route::get('/producto', function () {
-    return view('layouts/producto');
+Route::get('/product', function () {
+    return view('product');
 });
-Route::get('/registro', function () {
-    return view('layouts/registro');
+Route::get('/cambiar', function () {
+    return view('si');
 });
-Route::get('/categorias', function () {
-    return view('layouts/categorias');
+Route::get('/auth/reset-password', function () {
+    return view('auth/reset-password');
 });
 
+// Route::get('/categorias', function () {
+//     return view('categorias');
+// });
 
+// Route::get('/perfil', function () {
+//     return view('perfil');
+// });
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+require __DIR__.'/auth.php';
+
+
+Route::get('/', [App\Http\Controllers\ProductoController::class, 'top'])->name('top');
+Route::get('/marcas', [App\Http\Controllers\ProductoController::class, 'marcas'])->name('marcas');
+Route::get('/categorias', [App\Http\Controllers\ProductoController::class, 'categorias'])->name('categorias');
+Route::get('/categoria', [App\Http\Controllers\ProductoController::class, 'categorias'])->name('categorias');
+Route::get('/perfil', [App\Http\Controllers\UpdateUsersController::class, 'edit'])->name('edit');
+Route::put('/{user}/update', [App\Http\Controllers\UpdateUsersController::class, 'update'])->name('update');
