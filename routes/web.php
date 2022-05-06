@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,23 +14,43 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('layouts/home');
-});
-Route::get('/login', function () {
-    return view('layouts/login');
-});
+
 Route::get('/marcas', function () {
     return view('layouts/marcas');
 });
-Route::get('/producto', function () {
-    return view('layouts/producto');
+Route::get('/product', function () {
+    return view('layouts/product');
 });
-Route::get('/registro', function () {
-    return view('layouts/registro');
-});
-Route::get('/categorias', function () {
-    return view('layouts/categorias');
-});
+
+// Route::get('/perfil', function () {
+//     return view('perfil');
+// });
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+require __DIR__.'/auth.php';
+Route::resource('usuarios',UsuarioController::class);
+
+Route::get('/iniciar',[LoginController::class, 'create'])
+    ->name('Login.index');
+
+Route::post('/iniciar',[LoginController::class, 'store'])
+    ->name('Login.store');
+
+Route::get('/', [App\Http\Controllers\ProductoController::class, 'top'])->name('top');
+Route::get('/marcas', [App\Http\Controllers\ProductoController::class, 'marcas'])->name('marcas');
+Route::get('/categorias', [App\Http\Controllers\ProductoController::class, 'categorias'])->name('categorias');
+#Route::get('/categoria', [App\Http\Controllers\ProductoController::class, 'categoria'])->name('categoria');
+Route::get('/categorias/{categoria}/productos', [App\Http\Controllers\ProductoController::class, 'categoria'])->name('categoria');
+
+Route::get('/perfil', [App\Http\Controllers\ProductoController::class, 'perfil'])->name('perfil');
+Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'productsCategory'])->name('productsCategory');
+Route::get('/look', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory'])->name('productsCategory');
+Route::get('/primor', [App\Http\Controllers\PrimorScrapingController::class, 'productsCategory'])->name('productsCategory');
+
+
+
 
 

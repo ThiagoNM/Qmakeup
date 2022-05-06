@@ -1,0 +1,71 @@
+/* ~~~~~~~~~~~~ ESTILO DEL BODY ~~~~~~~~~~~~ */
+body{
+    background-color: #bee7f4;
+    font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+}
+
+/* ~~~~~~~~~~~~ CONTENEDORES ~~~~~~~~~~~~ */
+/* Contenedor que el formulario */
+.container__form{
+    width: 25%;
+    margin: auto;
+    background-color: #ead1dc;
+    margin-top: 10%;
+    padding: 2%;
+    box-shadow: 5px 5px 10px 1px rgb(112, 112, 112);
+    border-radius: 5px;
+}
+.container__form div ,button{
+    padding: 4%;
+}
+
+.container__form button{
+    margin-left: 4%;
+}
+
+/* ~~~~ ESTILOS DE LOS TEXTOS Y TITULOS ~~~~ */
+/* Estilo del titulo */
+.title--form{
+    font-size: 1.6vw; 
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10%;
+}
+
+
+/* Boton form */
+.boton--form{
+    background-color: #6d9eeb;
+    color: #272727;
+    box-shadow: 5px 5px 5px black ;
+    border-radius: 5px;
+    border: #6d9eeb solid 1px;
+    padding: 1%;
+    font-size: 0.9vw;
+}
+
+.boton--form:hover{
+    background-color: #558de7;
+}
+
+/* ~~~~ ESTILOS DE LOS TEXTOS Y TITULOS ~~~~ */
+/* Texto del formulario */
+.text--form{
+    margin-left: 4%;
+}
+
+.text--link{
+    color: #6d9eeb;
+}
+
+@media (max-width: 600px) {
+    .container__form{
+        width: 100%;
+    }
+    .title--form{
+        font-size: 5vw;
+    }
+    .boton--form{
+        font-size: 4vw;
+    }
+}

@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Producto;
+use Illuminate\Http\Request;
+
+class ProductoController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // $si=Producto::all();
+        // dd($si);
+        return view("producto.index", [
+            "productos" => Producto::all()
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function marcas()
+    {
+        return view("producto.marcas", [
+            "productos" => Producto::all()
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function categorias(Request $request)
+    {
+        return view("producto.categorias", [
+            "productos" => Producto::all()
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function top(Request $request)
+    {
+        return view("home", [
+            "productos" => Producto::all()
+        ]);
+    }
+
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function categoria(Request $request, $categoria)
+    {
+        $productos = Producto::all();
+
+        $productos = $productos->filter(function($producto, $categoria){
+            return $producto->categoria == $categoria;
+        });
+        
+        return view("producto.categoria", [
+            "categoria" => $categoria,
+            "productos" => $productos
+        ]);
+    }
+
+
+        /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+
+    public function perfil(Request $request)
+    {
+        return view("perfil", [
+            "productos" => Producto::all()
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Producto  $producto
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Producto $producto)
+    {
+        return view("productos.show", [
+            'productos' =>$producto
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Producto  $producto
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Producto $producto)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Producto  $producto
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Producto $producto)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Producto  $producto
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Producto $producto)
+    {
+        //
+    }
+}
