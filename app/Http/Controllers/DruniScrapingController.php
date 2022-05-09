@@ -13,17 +13,15 @@ class DruniScrapingController extends Controller
     {
 
         // Categoria::all();
-        $categorias = ['ojos', 'rostro', 'unas', 'labios']; 
-        foreach ($categorias as $cat) {
-            for ($i = 0; $i<=2; $i++)
+        $categorias = ['paco']; 
+        foreach ($categorias as $categoria) {
+            for ($i = 4999; $i<=5000; $i++)
             {
                 echo "<br> Pagina: " . $i . "<br>";
-                $offset = $i ++;
-                $pageUrl = "https://www.druni.es/maquillaje/{$cat}/?p=$offset";
+                $pageUrl = "https://www.druni.es/maquillaje/{$categoria}/?p=$i";
             
                 // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
                 $crawler = $client->request('GET', $pageUrl);
-
                 $inlineArtId = '"maincontent"';
                 $limiteArt = $crawler->filter("[id=$inlineArtId]")->each(function($productNode) {
 
@@ -31,9 +29,8 @@ class DruniScrapingController extends Controller
                     $limiteArt = $productNode->filter("[class='toolbar-number']")->first()->text();
                     return $limiteArt;
                 }); 
-
-
-                $this->extractProductsFrom($crawler, $limiteArt);
+                $limiteArt = intval($limiteArt[0]);
+                $this->extractProductsFrom($crawler, $categoria, $limiteArt);
             }
             
 
@@ -41,57 +38,58 @@ class DruniScrapingController extends Controller
     }
 
 
-    public function extractProductsFrom(Crawler $crawler,  $limiteArt)
+    public function extractProductsFrom(Crawler $crawler,  $categoria, $limiteArt)
     {
-        // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
-        $inlineProductStyles = '"item product product-item"';
+        for ($i = 0; $i<=$limiteArt; $i++)
+        {
+            // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
+            $inlineProductStyles = '"item product product-item"';
 
-        // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
-        // con EACH iteramos cada nodo del objeto CRAWLER
-        $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode) {
-
-            if ($productNode != null)
-            {
+            // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
+            // con EACH iteramos cada nodo del objeto CRAWLER
+            $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode, $categoria) {
 
                 // Filtramos el contenedor para recoger una información especifica
-                $imgNode = $productNode->filter("[class='product-image-photo']")->first()->attr('src');
+                $img = $productNode->filter("[class='product-image-photo']")->first()->attr('src');
 
-                $nameNode = $productNode->filter("[class='product-item-link']")->first()->text();
-                $marcaNode = $productNode->filter("[class='product-brand']")->first()->text();
-                $descripcionNode = $productNode->filter("[class='product description product-item-description']")->first()->text();
+                $nombre = $productNode->filter("[class='product-item-link']")->first()->text();
+                $marca = $productNode->filter("[class='product-brand']")->first()->text();
+                $descripcion = $productNode->filter("[class='product description product-item-description']")->first()->text();
                 $precioNode = $productNode->filter("[class='price-container price-final_price tax weee']")->first()->text();
                 
-                $precioNode = explode("€", $precioNode);
-                $precioNode = intval($precioNode[0]);
                 
-                $product = $this->extractProductInfo($imgNode ,$nameNode, $marcaNode, $descripcionNode, $precioNode);
-            
-            }
-            else{
-                echo "<br> Bien";
-            }
+                $precioDirty = explode("€", $precioNode);
+                $precioClean = trim($precioDirty[0]);
 
-        }); 
+                $precioFormat = str_replace(',','.',$precioClean);
+                $precio = floatval($precioFormat);
+
+                $valoracion = 0;
+                $idPagina = 1;
+
+                $product = $this->extractProductInfo($img, $marca, $precio, $nombre, $categoria, $descripcion, $valoracion, $idPagina );
+            }); 
+        }
+
     }
 
-    public function extractProductInfo($imgNode ,$nameNode, $marcaNode, $descripcionNode, $precioNode)
+    public function extractProductInfo($img ,$marca, $precio, $nombre, $categoria, $descripcion, $valoracion, $idPagina )
     {
-        echo $imgNode . "<br>" . $nameNode . "<br>" . $marcaNode . "<br>" .$descripcionNode . "<br>";        
-        // Producto::create([
-        //     "marca" => $marcaNode,
-        //     "precio" => $precioNode,
-        //     "nombre" => $nameNode,
-        //     'categoria' => "SI",
-        //     "descripcion" => $descripcionNode,
-        //     'valoracion'=> 0,
-        //     'id_pagina'=> 1
-        // ]);
+        Producto::create([
+            "imagen" => $img,
+            "marca" => $marca,
+            "precio" => $precio,
+            "nombre" => $nombre,
+            'categoria' => $categoria,
+            "descripcion" => $descripcion,
+            'valoracion'=> 0,
+            'id_pagina'=> $idPagina
+        ]);
     }
-
-
-    // RECOGER DATOS DE LA PÁGINA
     
-    public function pageData(Client $client)
+
+    // RECOGER DATOS DE GASTOS DE ENVIO DE LA PÁGINA
+    public function shippingCostData(Client $client)
     {
             
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
@@ -109,10 +107,6 @@ class DruniScrapingController extends Controller
         // con EACH iteramos cada nodo del objeto CRAWLER
         $crawler->filter("[class=$inlineProductStyles]")->each(function($dataNode) {
 
-            // $precioNode = $productNode->filter("[class='content_price price-box clearfix']")->filter('span');
-            // $sectionInfo = $precioNode->eq(2);
-            // $textInfo = $sectionInfo->text();
-
             // Filtramos el contenedor para recoger una información especifica
             $divs = $dataNode->filter("[class='article-body']")->first();
             $ulNode = $divs->children()->filter('ul');
@@ -125,14 +119,6 @@ class DruniScrapingController extends Controller
 
             
             dd($segundoLi->text());
-
-
-
-            
-
-
-            $product = $this->extractProductInfo($imgNode ,$nameNode, $marcaNode, $descripcionNode, $precioNode);
-
         }); 
     }
 

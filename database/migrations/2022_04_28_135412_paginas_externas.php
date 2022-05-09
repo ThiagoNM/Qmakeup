@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Tienda extends Migration
+class PaginasExternas extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class Tienda extends Migration
      */
     public function up()
     {
-        Schema::create('Tienda', function (Blueprint $table) {
+        Schema::create('paginas_externas', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->decimal('gastos', 4,2);
-            $table->decimal('gastos_min', 4,2);
-            $table->integer('impuestos');
+            $table->string('url');
+            $table->foreignId('id_tienda')
+                  ->references('id')->on('tiendas');
             $table->timestamps();
         });
     }
@@ -30,6 +29,9 @@ class Tienda extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Tienda');
+        Schema::table('paginas_externas', function ($table){
+            $table -> dropForeign(['id_tienda']);
+        });
+        Schema::dropIfExists('paginas_externas');
     }
 }
