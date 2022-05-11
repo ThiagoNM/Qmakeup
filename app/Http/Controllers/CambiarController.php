@@ -79,7 +79,6 @@ class CambiarController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
         
-
         $ok =  $user->updateOrFail ([
             'password' => Hash::make($request->password)                        
         ]);
