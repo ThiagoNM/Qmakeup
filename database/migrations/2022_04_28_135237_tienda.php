@@ -16,7 +16,8 @@ class Tienda extends Migration
         Schema::create('Tienda', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
-            $table->integer('gastos');
+            $table->decimal('gastos', 4,2);
+            $table->decimal('gastos_min', 4,2);
             $table->integer('impuestos');
             $table->timestamps();
         });

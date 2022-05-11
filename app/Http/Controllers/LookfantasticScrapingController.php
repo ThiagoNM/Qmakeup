@@ -9,23 +9,32 @@ use App\Models\Producto;
 
 class LookfantasticScrapingController extends Controller
 {
+    private $nombre = "Lookfantastic";
+
     public function productsCategory(Client $client)
     {
         // Categoria::all();
-        // $categorias = ['ojos', 'rostro', 'unas', 'labios']; 
-        // foreach ($categorias as $categoria) {
-        //     for ($i = 0; $i<=2; $i++)
-        //     {
+        $subcategorias = ['complexion.list']; 
+        foreach ($subcategorias as $subcategoria) {
+            echo "-----". "<br>" . "subcategoria1: " . $subcategoria . "<br>";
+            $pageUrl = "https://www.lookfantastic.es/health-beauty/make-up/{$subcategoria}";
+            $crawler = $client->request('GET', $pageUrl);
+
+            $lastPage = $this->extractlastPage($crawler);
+            echo "Ultima pagina: " . $lastPage[0] . "<br>";
+            for ($i = 0; $i<=$lastPage[0]; $i++)
+            {
+                echo "-----". "<br>" . "Pagina: " . $i . "<br>";
+                echo "-----". "<br>" . "subcategoria2: " . $subcategoria . "<br>";
+
                 // $offset = $i ++;
-                $pageUrl = "https://www.lookfantastic.es/health-beauty/make-up/eyes.list";
+                $pageUrl = "https://www.lookfantastic.es/health-beauty/make-up/{$subcategoria}?pageNumber={$i}";
             
                 // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
                 $crawler = $client->request('GET', $pageUrl);
                 $this->extractProductsFrom($crawler);
-            // }
-            
-
-        // }
+            }
+        }
     }
 
 
@@ -37,70 +46,107 @@ class LookfantasticScrapingController extends Controller
         // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
         // con EACH iteramos cada nodo del objeto CRAWLER
         $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode) {
-            // Filtramos el contenedor para recoger una información especifica
-            $imgNode = $productNode->filter("[class='productBlock_image']")->first()->attr('src');
-            echo "Imagen: " . $imgNode . "<br>" ;
-            
-            $nameNode = $productNode->filter("[class='productBlock_productName']")->first()->text();
-            $precioNode = $productNode->filter("[class='productBlock_price']")->first()->text();
-            $precioNode = explode("€", $precioNode);
-            $precioNode = intval($precioNode[0]);
-            echo "Nombre: " . $nameNode . "<br>" ;
-            echo "Precio: " . $precioNode . "<br>" ;
 
+            // Comprovar que tenga existencias 
+            $stock = $productNode->filter("[class='productBlock_actions']")->first()->text();
+            if ($stock != "PRÓXIMAMENTE")
+            {
 
-            $linkHome = "https://www.lookfantastic.es";
-            $linkNode = $productNode->filter("[class='productBlock_link']")->first()->attr('href');
-            $link = $linkHome . $linkNode;
-            echo "Link: " . $link . "<br>" ;
-            
-            // -------------------------------------------
-
-            $client = new Client();
-            $crawler = $client->request('GET', $link);
-            $marcaNode = $crawler->filter("[class= 'athenaProductPage_productDetailsContainer' ]")->each(function($productNode) {
+                // Filtramos el contenedor para recoger una información especifica
+                $precioNode = $productNode->filter("[class='productBlock_price']")->first()->text();
                 
-                $longDiv = $productNode->filter("[class='productBrandLogo_image']")->count();
-                if ($longDiv != 0)
-                {
-                    $marcaN = $productNode->filter("[class='productBrandLogo_image']")->first()->attr('title');
-                    return $marcaN;
-                }
-                else{
-                    $marcaN = array("si");
-                    return $marcaN;
-                }
-            });
-            // echo "Marca: " . implode($marcaNode) . "<br>" ;
+                $precioDirty = explode("€", $precioNode);
+                $precioClean = trim($precioDirty[0]);
 
-            // $marcaNode = implode($marcaNode);
+                $precioFormat = str_replace(',','.',$precioClean);
+                $precio = floatval($precioFormat);
+                echo $precio . "<br>";
+                // $product = $this->extractProductInfo($idProducto, $idPagina, $precio);
 
-            $descripcionNode = $crawler->filter("[class= 'athenaProductPage_breakpoint-lg_productDescription' ]")->each(function($productNode) {
-                
-                $descripcionN = $productNode->filter("[class='productDescription_synopsisContent']")->text();
-                return $descripcionN;
-            });
-            echo "Descripción: " . $descripcionNode[0] . "<br>" ;
+                // Limite de pagina
+            }
 
-            $product = $this->extractProductInfo($imgNode ,$marcaNode, $precioNode, $nameNode, $categoria, $descripcionNode, $valoracion, $idPagina );
         }); 
 
 
     }
-
-    public function extractProductInfo($imgNode ,$marcaNode, $precioNode, $nameNode, $categoria, $descripcionNode, $valoracion, $idPagina )
+    public function extractlastPage(Crawler $crawler )
     {
-        // Producto::create([
-        //     "imagen" => $imgNode,
-        //     "marca" => $marcaNode,
-        //     "precio" => $precioNode,
-        //     "nombre" => $nameNode,
-        //     'categoria' => $categoria,
-        //     "descripcion" => $descripcionNode,
-        //     'valoracion'=> 0,
-        //     'id_pagina'=> $idPagina
-        // ]);
+        $inlineProductStyles = '"responsiveProductListPage_topPagination"';
+
+        $ultimaPagina = $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode) {
+
+            $ul = $productNode->filter("[class='responsivePageSelectors']");
+            $paginador = $ul->filter("[class='responsivePaginationButton responsivePageSelector   responsivePaginationButton--last']");
+            $ultPagina = $paginador->text();
+            return $ultPagina ;
+        }); 
+        return $ultimaPagina;
     }
 
-    
+
+    // Guardar en la base de datos el precio
+    public function createPrecios($idProducto ,$idPagina, $precio)
+    {
+        Precios::create([
+            "id_producto" => $idProducto,
+            'id_pagina'=> $idPagina,
+            "precio" => $precio,
+        ]);
+    }
+
+    // RECOGER DATOS DE GASTOS DE ENVIO DE LA PÁGINA
+    public function shippingCostData(Client $client)
+    {
+        // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
+        $crawler = $client->request('GET', 'https://www.lookfantastic.es/info/delivery-information.list');
+        $this->extractShippingCostsFrom($crawler,);
+    }
+
+    public function extractShippingCostsFrom(Crawler $crawler)
+    {
+        // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
+        $inlineProductStyles = '"accordionWidget componentWidget"';
+
+        // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
+        // con EACH iteramos cada nodo del objeto CRAWLER
+        $cont = 0;
+        $crawler->filter("[class=$inlineProductStyles]")->each(function($dataNode, $cont) {
+            if($cont < 1)
+            {
+                // Filtramos el contenedor para recoger una información especifica
+                $divs = $dataNode->filter("[id='wrapper']")->first()->children();
+                //Gastos de envio baleares, p
+                $gastosPBUnclean = $divs->eq(3)->text();
+                $gastosPBArrayClean = explode("€", $gastosPBUnclean);
+                $gastosSubstituted = str_replace(',','.',$gastosPBArrayClean);
+
+                $gastosPB =  floatval($gastosPBArrayClean[0]);
+
+                // Gastos minimos 
+                $gastosMinimosUnclean = $divs->eq(1)->text();
+                $gastosMinimosArrayUnclean = explode("de ", $gastosMinimosUnclean);
+                $gastosMinimosArrayClean = explode("€", $gastosMinimosArrayUnclean[2]);
+
+                $gastosMinimos =  intval($gastosMinimosArrayClean[0]);
+                
+                echo "<br> ---------- <br> Gastos PB: " . $gastosPB . "<br> Gastos Minimos: " . $gastosMinimos . "<br>";
+
+                //Nombre de la tienda
+                $nombre = $this->nombre;
+                // $this->crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
+                $cont ++;
+            }
+        }); 
+    }
+
+    public function crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos )
+    {
+        Tiendas::create([
+            "nombre" => $nombre,
+            "gastos_peninsula" => $gastosPeninsula,
+            "gastos_baleares" => $gastosBaleares,
+            'gastos_minimos' => $gastosMinimos,
+        ]);
+    }
 }

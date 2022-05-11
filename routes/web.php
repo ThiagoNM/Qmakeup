@@ -31,13 +31,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 require __DIR__.'/auth.php';
-Route::resource('usuarios',UsuarioController::class);
 
-Route::get('/iniciar',[LoginController::class, 'create'])
-    ->name('Login.index');
-
-Route::post('/iniciar',[LoginController::class, 'store'])
-    ->name('Login.store');
 
 Route::get('/', [App\Http\Controllers\ProductoController::class, 'top'])->name('top');
 Route::get('/marcas', [App\Http\Controllers\ProductoController::class, 'marcas'])->name('marcas');
@@ -46,11 +40,21 @@ Route::get('/categorias', [App\Http\Controllers\ProductoController::class, 'cate
 Route::get('/categorias/{categoria}/productos', [App\Http\Controllers\ProductoController::class, 'categoria'])->name('categoria');
 
 Route::get('/perfil', [App\Http\Controllers\ProductoController::class, 'perfil'])->name('perfil');
-Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'productsCategory'])->name('productsCategory');
-Route::get('/look', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory'])->name('productsCategory');
-Route::get('/primor', [App\Http\Controllers\PrimorScrapingController::class, 'productsCategory'])->name('productsCategory');
+
+// Web Scraping
+Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'productsCategory']);
+Route::get('/look', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory']);
+Route::get('/primor', [App\Http\Controllers\PrimorScrapingController::class, 'productsCategory']);
+Route::get('/maquillalia', [App\Http\Controllers\MaquillaliaScrapingController::class, 'productsCategory']);
+
+// Categorias de cada página
+Route::get('/cd', [App\Http\Controllers\DruniCategoriaScrapingController::class, 'category']);
+Route::get('/cm', [App\Http\Controllers\MaquillaliaCategoriaScrapingController::class, 'category']);
+Route::get('/cl', [App\Http\Controllers\LookfantasticCategoriaScrapingController::class, 'category']);
 
 
-
-
+// Gastos de envio de cada página
+Route::get('/gastosd', [App\Http\Controllers\DruniScrapingController::class, 'shippingCostData']);
+Route::get('/gastosl', [App\Http\Controllers\LookfantasticScrapingController::class, 'shippingCostData']);
+Route::get('/gastosm', [App\Http\Controllers\MaquillaliaScrapingController::class, 'shippingCostData']);
 
