@@ -40,6 +40,21 @@ Route::get('/categorias', [App\Http\Controllers\ProductoController::class, 'cate
 Route::get('/categorias/{categoria}/productos', [App\Http\Controllers\ProductoController::class, 'categoria'])->name('categoria');
 
 Route::get('/perfil', [App\Http\Controllers\ProductoController::class, 'perfil'])->name('perfil');
+<<<<<<< HEAD
+=======
+Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'productsCategory'])->name('productsCategory');
+Route::get('/look', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory'])->name('productsCategory');
+Route::get('/primor', [App\Http\Controllers\PrimorScrapingController::class, 'productsCategory'])->name('productsCategory');
+Route::get('/maquillalia', [App\Http\Controllers\MaquillaliaScrapingController::class, 'productsCategory'])->name('productsCategory');
+
+Route::get('/cat', [App\Http\Controllers\CategoriaScrapingController::class, 'category'])->name('category');
+Route::get('/category', [App\Http\Controllers\CategoryScrapingController::class, 'category'])->name('category');
+Route::get('/cd', [App\Http\Controllers\DruniCategoriaScrapingController::class, 'category'])->name('category');
+Route::get('/cm', [App\Http\Controllers\MaquillaliaCategoriaScrapingController::class, 'category'])->name('category');
+Route::get('/cl', [App\Http\Controllers\LookfantasticCategoriaScrapingController::class, 'category'])->name('category');
+
+
+>>>>>>> b6b9043cd608abe61ad1144d046b1ac4966c4bf5
 
 // Web Scraping
 Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'productsCategory']);

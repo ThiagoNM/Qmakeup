@@ -13,6 +13,7 @@ class LookfantasticScrapingController extends Controller
 
     public function productsCategory(Client $client)
     {
+<<<<<<< HEAD
         // Categoria::all();
         $subcategorias = ['complexion.list']; 
         foreach ($subcategorias as $subcategoria) {
@@ -34,6 +35,16 @@ class LookfantasticScrapingController extends Controller
                 $crawler = $client->request('GET', $pageUrl);
                 $this->extractProductsFrom($crawler);
             }
+=======
+        for ($i = 0; $i<=2; $i++)
+        {
+            // $offset = $i ++;
+            $pageUrl = "https://www.lookfantastic.es/health-beauty/make-up/eyes.list?pageNumber={$i}";
+        
+            // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
+            $crawler = $client->request('GET', $pageUrl);
+            $this->extractProductsFrom($crawler);
+>>>>>>> b6b9043cd608abe61ad1144d046b1ac4966c4bf5
         }
     }
 
@@ -46,6 +57,7 @@ class LookfantasticScrapingController extends Controller
         // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
         // con EACH iteramos cada nodo del objeto CRAWLER
         $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode) {
+<<<<<<< HEAD
 
             // Comprovar que tenga existencias 
             $stock = $productNode->filter("[class='productBlock_actions']")->first()->text();
@@ -66,6 +78,18 @@ class LookfantasticScrapingController extends Controller
                 // Limite de pagina
             }
 
+=======
+            // Filtramos el contenedor para recoger una información especifica
+            $precioNode = $productNode->filter("[class='productBlock_price']")->first()->text();
+            
+            $precioDirty = explode("€", $precioNode);
+            $precioClean = trim($precioDirty[0]);
+
+            $precioFormat = str_replace(',','.',$precioClean);
+            $precio = floatval($precioFormat);
+            
+            $product = $this->extractProductInfo($idProducto, $idPagina, $precio);
+>>>>>>> b6b9043cd608abe61ad1144d046b1ac4966c4bf5
         }); 
 
 
@@ -85,6 +109,7 @@ class LookfantasticScrapingController extends Controller
     }
 
 
+<<<<<<< HEAD
     // Guardar en la base de datos el precio
     public function createPrecios($idProducto ,$idPagina, $precio)
     {
@@ -149,4 +174,14 @@ class LookfantasticScrapingController extends Controller
             'gastos_minimos' => $gastosMinimos,
         ]);
     }
+=======
+    public function extractProductInfo( $idProducto, $idPagina, $precio )
+    {
+        Precio::create([
+            "producto_id" => $idProducto,
+            "pagina_id" => $idPagina,
+            "precio"=> $precio
+        ]);
+    }
+>>>>>>> b6b9043cd608abe61ad1144d046b1ac4966c4bf5
 }
