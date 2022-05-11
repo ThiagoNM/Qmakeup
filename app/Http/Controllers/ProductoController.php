@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use Illuminate\Http\Request;
+<<<<<<< HEAD
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
+=======
+>>>>>>> web-screpping
 
 class ProductoController extends Controller
 {
@@ -19,6 +22,7 @@ class ProductoController extends Controller
     {
         // $si=Producto::all();
         // dd($si);
+<<<<<<< HEAD
         //$prodc = Producto::paginate(10);
         //return view("producto.index", [
         //    "productos"->$prodc
@@ -26,6 +30,11 @@ class ProductoController extends Controller
         //dd("hola");
         //$productos = Producto::paginate(4);
         //return view("producto.marcas", compact('productos'));
+=======
+        return view("producto.index", [
+            "productos" => Producto::all()
+        ]);
+>>>>>>> web-screpping
     }
 
     /**
@@ -33,6 +42,7 @@ class ProductoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+<<<<<<< HEAD
     public function marcas(Request $request)
     {
         //if($request) {
@@ -73,6 +83,13 @@ class ProductoController extends Controller
     ]);
 
 
+=======
+    public function marcas()
+    {
+        return view("producto.marcas", [
+            "productos" => Producto::all()
+        ]);
+>>>>>>> web-screpping
     }
 
     /**
@@ -110,8 +127,34 @@ class ProductoController extends Controller
      */
     public function categoria(Request $request, $categoria)
     {
+<<<<<<< HEAD
         dd($categoria);
         return view("productos.categorias", [
+=======
+        $productos = Producto::all();
+
+        $productos = $productos->filter(function($producto, $categoria){
+            return $producto->categoria == $categoria;
+        });
+        
+        return view("producto.categoria", [
+            "categoria" => $categoria,
+            "productos" => $productos
+        ]);
+    }
+
+
+        /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+
+    public function perfil(Request $request)
+    {
+        return view("perfil", [
+>>>>>>> web-screpping
             "productos" => Producto::all()
         ]);
     }

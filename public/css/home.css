@@ -32,6 +32,22 @@
     margin-top: 5%;
     margin-bottom: 2%;
 }
+<<<<<<< HEAD
+=======
+
+.navbar__categories button{
+    color: #6d9eeb;
+    background-color: #272727;
+    padding: 0.5%;
+}
+.navbar__categories button:hover{
+    background-color: #ead1dc;
+}
+
+.form--navbar{
+    margin-top: 1%;
+}
+>>>>>>> web-screpping
 
 .navbar__categories button{
     color: #6d9eeb;
@@ -146,6 +162,7 @@ body{
 .container__product:hover{
     -webkit-transform:scale(1.05);
     transform:scale(1.05);
+<<<<<<< HEAD
 }
 
 .container__product--details{
@@ -154,6 +171,16 @@ body{
     margin-left: 1%;
 }
 
+=======
+}
+
+.container__product--details{
+    width: 40%;
+    padding: 1%;
+    margin-left: 1%;
+}
+
+>>>>>>> web-screpping
 
 /* Contendor con las tiendas con las que trabajamos */
 .continer__business{

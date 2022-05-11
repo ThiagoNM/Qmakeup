@@ -32,7 +32,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+<<<<<<< HEAD
         return redirect('/');
+=======
+        return redirect()->intended('/');
+>>>>>>> web-screpping
     }
 
     /**

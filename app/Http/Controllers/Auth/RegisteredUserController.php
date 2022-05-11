@@ -53,6 +53,9 @@ class RegisteredUserController extends Controller
         $request->user()->sendEmailVerificationNotification();
 
         return redirect('/')->with('status', 'verification-link-sent');
+<<<<<<< HEAD
         
+=======
+>>>>>>> web-screpping
     }
 }
