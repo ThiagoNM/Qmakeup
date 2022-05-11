@@ -14,24 +14,18 @@
 
 </head>
 <body>
-
-  <form class="container__form" method="POST" action="{{ route('login') }}" enctype="multipart/form-data">
+  <form class="container__form" method="post" action="{{ route('password_update') }}" enctype="multipart/form-data">
     @csrf
+    @method('put')
     <p class="title--form">Cambiar contraseña</p>
     <div class="form-group">
-      <label for="Lastpassword">Ultima contraseña</label>
-      <input type="email" class="form-control" id="lastpassword" name="lastpassword"  required autocomplete="current-password"placeholder="password">
+      <label for="Password1">Password</label>
+      <input type="password" class="form-control" id="Password1" name="password" required autocomplete="new-password"  placeholder="Password" autofocus>
     </div>
     <div class="form-group">
-      <label for="Password1">Nueva contraseña</label>
-      <input type="password" class="form-control" id="Password1" name="password1"  placeholder="Password">
+      <label for="Password2">Confirm password</label>
+      <input type="password" class="form-control" id="Password2" name="password_confirmation" required placeholder="Confirm password">
     </div>
-
-    <div class="form-group">
-      <label for="Password2">Repetir contraseña</label>
-      <input type="password" class="form-control" id="Password2" name="password2"  placeholder="Password">
-    </div>
-
     <button type="submit" class="boton--form">{{ __('Cambiar') }}</button>
   </form>
 

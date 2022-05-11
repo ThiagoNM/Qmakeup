@@ -74,9 +74,12 @@ class UpdateUsersController extends Controller
             'name' => 'required',
         ]);
            
-        $user->name = $request->name;
-        $user->save();
+        $user=\Auth::user();
 
+        $ok =  $user->updateOrFail ([
+            'name' => $request->name
+        ]);
+        
         return redirect()->route('top')->with('succes', 'Actualizado correctamente');
     }
 

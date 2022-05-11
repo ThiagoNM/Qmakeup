@@ -10,7 +10,7 @@
             </div>
       @endif
 
-      <form class="container__form" action="{{ route('update', $user->id)}}" method="POST">
+      <form class="container__form" action="{{ route('update' )}}" method="PUT">
         @csrf
         @method('PUT')
         <p class="title--container">Datos del usuario</p>
@@ -18,13 +18,14 @@
           <label for="Username">Usuario</label>
           <input type="text" class="form-control" id="Username" name="name" placeholder="{{ $user->name }}">
         </div>
-        <div class="form-group">
-          <label for="Email">Contraseña</label>
-          <input type="password" class="form-control" id="Email" name="password" placeholder="***********">
-        </div>
-        <p class="text--form"><a class="text--link" href="/auth/reset-password">He olvidado la contraseña</a></p>
-        <button type="submit" class="boton--form">Actualizar cambios</button>
+        <p class="text--form"><button type="submit"class="text--link" >Actualizar nombre</button></p>
+
       </form>
+      <p class="text--form"><a class="text--link" href="{{route('ea')}}">Cambiar contraseña</a></p>
+
+
+     
+      
 
       <!-- PRODUCTOS TOP -->
       <label class="title title--container">Lista de deseos</label>
