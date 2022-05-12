@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CategoriasTiendas extends Migration
+class SubcategoriasTienda extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CategoriasTiendas extends Migration
      */
     public function up()
     {
-        Schema::create('categorias_tiendas', function (Blueprint $table) {
+        Schema::create('subcategorias_tiendas', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
-            $table->foreignId('id_categoria')
-                    ->references('id')->on('categorias');
+            $table->foreignId('id_subcategoria')
+                    ->references('id')->on('subcategorias');
             $table->string('url_categoria');
         });
+
     }
 
     /**
@@ -29,9 +30,9 @@ class CategoriasTiendas extends Migration
      */
     public function down()
     {
-        Schema::table('categorias_tiendas', function ($table){
-            $table -> dropForeign(['id_categoria']);
+        Schema::table('subcategorias_tiendas', function ($table){
+            $table -> dropForeign(['id_subcategoria']);
         });
-        Schema::dropIfExists('categorias_tiendas');
+        Schema::dropIfExists('subcategorias_tiendas');
     }
 }

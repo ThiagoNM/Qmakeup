@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Precios extends Migration
+class Categorias extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class Precios extends Migration
      */
     public function up()
     {
-        Schema::create('precios', function (Blueprint $table) {
+        Schema::create('categorias', function (Blueprint $table) {
             $table->id();
-            $table->string('id_producto');
-            $table->string('id_pagina');
-            $table->string('precio');
+            $table->string('nombre');
         });
     }
 
@@ -28,6 +26,6 @@ class Precios extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('precios');
+        Schema::dropIfExists('categorias');
     }
 }

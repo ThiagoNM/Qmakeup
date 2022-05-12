@@ -18,8 +18,8 @@ class Usuarios extends Migration
             $table->string('username');
             $table->string('correo');
             $table->string('contrasenya');
-            $table->foreignId('rol')
-                  ->references('id')->on('Rol');
+            $table->foreignId('id_rol')
+                  ->references('id')->on('roles');
             $table->timestamps();
         });
     }
@@ -32,7 +32,7 @@ class Usuarios extends Migration
     public function down()
     {
         Schema::table('usuarios', function ($table){
-            $table -> dropForeign(['Rol']);
+            $table -> dropForeign(['roles']);
         });
         Schema::dropIfExists('usuarios');
     }
