@@ -13,7 +13,15 @@ class Precios extends Migration
      */
     public function up()
     {
-        //
+        Schema::create('precios', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('id_producto')
+                  ->references('id')->on('productos');
+            $table->foreignId('id_tienda')
+                    ->references('id')->on('tiendas');
+            $table->decimal('precio',4,2);
+            $table->timestamps();
+        });
     }
 
     /**
@@ -23,6 +31,10 @@ class Precios extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('precios', function ($table){
+            $table -> dropForeign(['id_tienda']);
+            $table -> dropForeign(['id_producto']);
+        });
+        Schema::dropIfExists('precios');
     }
 }

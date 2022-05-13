@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Usuarios extends Migration
+class Subcategorias extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,11 @@ class Usuarios extends Migration
      */
     public function up()
     {
-        Schema::create('usuarios', function (Blueprint $table) {
+        Schema::create('subcategorias', function (Blueprint $table) {
             $table->id();
-            $table->string('username');
-            $table->string('correo');
-            $table->string('contrasenya');
-            $table->foreignId('rol')
-                  ->references('id')->on('Rol');
+            $table->string('nombre');
+            $table->foreignId('id_categoria')
+                    ->references('id')->on('categorias');
             $table->timestamps();
         });
     }
@@ -31,9 +29,9 @@ class Usuarios extends Migration
      */
     public function down()
     {
-        Schema::table('usuarios', function ($table){
-            $table -> dropForeign(['Rol']);
+        Schema::table('subcategorias', function ($table){
+            $table -> dropForeign(['id_categoria']);
         });
-        Schema::dropIfExists('usuarios');
+        Schema::dropIfExists('subcategorias');
     }
 }

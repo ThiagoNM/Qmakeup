@@ -15,15 +15,15 @@ class Productos extends Migration
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
+            $table->string('imagen');
+            $table->string('nombre')->unique();
             $table->string('marca');
-            $table->decimal('precio', 5, 2);
-            $table->string('nombre');
-            $table->foreignId('id_categoria')
-                ->references('id')->on('categorias');
+            $table->foreignId('id_subcategoria')
+                ->references('id')->on('subcategorias');
             $table->string('descripcion');
             $table->integer('valoracion');
-            $table->foreignId('id_pagina')
-                  ->references('id')->on('paginas_externas');
+            $table->foreignId('id_tienda')
+                  ->references('id')->on('tiendas');
             $table->timestamps();
         });
     }
@@ -36,8 +36,8 @@ class Productos extends Migration
     public function down()
     {
         Schema::table('productos', function ($table){
-            $table -> dropForeign(['id_pagina']);
-            $table -> dropForeign(['id_categoria']);
+            $table -> dropForeign(['id_tienda']);
+            $table -> dropForeign(['id_subcategoria']);
         });
         Schema::dropIfExists('productos');
     }
