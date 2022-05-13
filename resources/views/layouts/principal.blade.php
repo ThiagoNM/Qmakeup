@@ -25,19 +25,19 @@
               <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                   <li class="nav-item">
-                    <a class="nav-link active boton--nav" aria-current="page" href="/">Inicio</a>
+                    <a class="nav-link active boton--nav" aria-current="page" href="{{ route('top') }}">Inicio</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link boton--nav" href="/marcas">Marcas</a>
+                    <a class="nav-link boton--nav" href="{{ route('marcas') }}">Marcas</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link boton--nav" href="/categorias">Categorias</a>
+                    <a class="nav-link boton--nav" href="{{ route('categorias') }}">Categorias</a>
                   </li>
                 </ul>
 
 
                 @if(Auth::user()!=null)
-                  <a class="icono icono--navbar" type="button" href="/perfil"><i class="bi bi-person"></i></a> 
+                  <a class="icono icono--navbar" type="button" href="{{ route('perfil') }}"><i class="bi bi-person"></i></a> 
                   <!-- <a class="icono icono--navbar" type="button" href="/logout"><i class="bi bi-door-open"></i></a>    -->
                   <form method="POST" action="{{ route('logout') }}" class="form--navbar">
                         @csrf
@@ -49,8 +49,8 @@
                         <a>
                     </form>
                 @else
-                  <a class="nav-link boton--nav" href="/login">Iniciar sesión</a>
-                  <a class="nav-link boton--nav" href="/register">Registrase</a>
+                  <a class="nav-link boton--nav" href="{{ route('login') }}">Iniciar sesión</a>
+                  <a class="nav-link boton--nav" href="{{ route('register') }}">Registrase</a>
                 @endif
 
               </div>
@@ -72,8 +72,4 @@
   <!-- Script para funciones -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> web-screpping

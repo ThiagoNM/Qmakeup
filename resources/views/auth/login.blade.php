@@ -13,7 +13,7 @@
       <input type="password" class="form-control" id="Password1" name="password" required autocomplete="current-password" placeholder="Password">
     </div>
     <p class="text--form">No estas registrado? <a class="text--link" href="#">Registrate</a></p>
-    <p class="text--form"><a class="text--link" href="/forgot-password">He olvidado la contraseña?</a></p>
+    <p class="text--form"><a class="text--link" href="{{ route('password.request') }}">He olvidado la contraseña?</a></p>
     <button type="submit" class="boton--form">{{ __('Log in') }}</button>
   </form>
 

@@ -7,20 +7,20 @@
     <div class="centered">
         <label class="title">HOLA, BIENVENIDO!</label>
         <label class="text">Busca tu producto de maquillaje clicando</label>
-        <button class="boton-welcome">AQUÍ</button>
+        <button class="boton--welcome">AQUÍ</button>
     </div>
 </div>
 <br>
 
 <!-- CONTENEDOR PARA CENTRAR -->
-<div class="container--king">
+<div class="container__king">
 
   <!-- PRODUCTOS TOP -->
   <label class="title title--container">Productos mejor valorados</label>
   @php
     $cont = 0
   @endphp
-  <div class="container__top">
+  <div class="containercontainer--top">
 
     @foreach ($productos as $producto)
 
@@ -49,15 +49,15 @@
 
   <!-- INFORMACIÓN DE LA EMPRESA -->
   <label class="title title--container">Sobre nosotros</label>
-  <div class="container__top">
+  <div class="container">
     <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Est ipsam similique quo explicabo nam iure delectus accusantium dolorum consequuntur, nobis possimus vero! Laborum soluta similique adipisci, blanditiis est illum quasi!</p>
   </div>
 
   <p class="title title--question">¿De donde sacamos los productos?</p>
-  <div class="container__top">
+  <div class="container">
     <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Est ipsam similique quo explicabo nam iure delectus accusantium dolorum consequuntur, nobis possimus vero! Laborum soluta similique adipisci, blanditiis est illum quasi!</p>
   </div>
-  <div class="continer--business">
+  <div class="continer__business">
     <img src="{{ asset('imagenes/logo-DRUNI.png') }}" alt="">
     <img src="{{ asset('imagenes/logo-primor.jpg') }}" alt="">
     <img src="{{ asset('imagenes/logo-lookfantastic.png') }}" alt="">

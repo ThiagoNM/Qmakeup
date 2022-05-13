@@ -27,6 +27,7 @@
         @foreach ($productos as $producto)
 
         <div class="container__product">
+          <a class="nada" href="{{ route('producto') }}">
           <img class="img__product" src="{{ asset('imagenes/producto.jpg') }}" alt="">
           <label for="" class="title--product">{{ $producto->nombre}}</label>
           <p for="" class="text--product">{{ $producto->descripcion}}</p>
@@ -37,6 +38,7 @@
             <i class="bi bi-star"></i>
             <i class="bi bi-star"></i>
             <label for="">{{ $producto->valoracion}}</label>
+            </a>
           </div>
         </div>
         @endforeach
