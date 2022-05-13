@@ -60,11 +60,8 @@ class DruniCategoriaScrapingController extends Controller
                 if ($porciento > 80)
                 { 
                     // Recogemos la ruta de la categoria
-                    $ruta_categoria = $categoryNode->filter('a')->attr('href');
 
-                    $id_tienda = $this->id_tienda;
                     // Añadimos en la base de datos la categoria de esta tienda
-                    $this->crearCategoriaTienda($nombreCategoria, $ruta_categoria);
 
                     // Volvemos a filtrar la página para obtener las subclases pero por ello tendremos que volver a recorrerlo y volveremos a encontrarnos con categorias
                     $pageUrl = $this->pageUrl;
@@ -77,46 +74,66 @@ class DruniCategoriaScrapingController extends Controller
                         $nombreCategoriaYSubcategoria = $this->limpiarAcentos($nombreCategoriaYSubcategoria);
                         $nombreCategoriaYSubcategoria = strtolower($nombreCategoriaYSubcategoria);
                         
+                        // Recoger categorias
+                        $ListCategory = $this->recogerCategorias();
+                        $countListCat = count($ListCategory);
                         $ListCategory = $this->recogerCategorias();
                         // Comprovamos de recoger las subcategorias de las categorias que nos interesan 
-
-                        if (in_array($nombreCategoriaYSubcategoria, $ListCategory))
+                        for ($i = 0; $i<$countListCat; $i++)
                         {
-                            $ListSubcategory = $this->recogerSubcategorias();
-                            echo ("<br> Es una categoria: " . $nombreCategoriaYSubcategoria);
-                            
-                            if  (in_array($nombreCategoriaYSubcategoria, $ListSubcategory))
-                            {
-                                echo "<br> Es una Subcategoria: " . $nombreCategoriaYSubcategoria;
-                                // Recoger subcategorias
-                                $ListSubcategory = $this->recogerSubcategorias();
-                                $countListSubcat = count($ListSubcategory);
-                                for ($i = 0; $i<$countListSubcat; $i++)
-                                {   
-    
-                                    // Recoger subcategorias
+                            similar_text($ListCategory[$i], $nombreCategoriaYSubcategoria, $porciento);
+                            if ($porciento > 80)
+                            { 
+                                $ListaCategoriasYaRecogidas = [];
+                                array_push($ListaCategoriasYaRecogidas, $nombreCategoriaYSubcategoria);
+                                if (!in_array($nombreCategoriaYSubcategoria, $ListaCategoriasYaRecogidas))
+                                {
+                                    dd("hola");
+                                    $ruta_categoria = $categoryNode->filter('a')->attr('href');
+                                    $this->crearCategoriaTienda($nombreCategoriaYSubcategoria, $ruta_categoria);
+                                    
+
+                                    
                                     $ListSubcategory = $this->recogerSubcategorias();
-    
-                                    similar_text($ListSubcategory[$i], $nombreCategoriaYSubcategoria, $porciento);
-                                    if ($porciento > 80)
+
+
+                                    echo ("<br> Es una categoria: " . $nombreCategoriaYSubcategoria);
+
+                                    if  (in_array($nombreCategoriaYSubcategoria, $ListSubcategory))
                                     {
-                                        // Comprovamos que no recojamos una categoria o una subcategoria no correspondiente
-    
-                                        // Ruda de la subcategoria
-                                        $ruta_subcategoria = $categoryNode->attr('href');
-                                        // Recoger la id
-    
-                                        // Añadimos en la base de datos la subcategoria de esta tienda
-                                        $this->crearSubcategoriaTienda($nombreCategoriaYSubcategoria, $ruta_subcategoria);
-    
-                                        break;
+                                        echo "<br> Es una Subcategoria: " . $nombreCategoriaYSubcategoria;
+                                        // Recoger subcategorias
+                                        $ListSubcategory = $this->recogerSubcategorias();
+                                        $countListSubcat = count($ListSubcategory);
+                                        for ($i = 0; $i<$countListSubcat; $i++)
+                                        {   
+            
+                                            // Recoger subcategorias
+                                            $ListSubcategory = $this->recogerSubcategorias();
+            
+                                            similar_text($ListSubcategory[$i], $nombreCategoriaYSubcategoria, $porciento);
+                                            if ($porciento > 80)
+                                            {
+                                                // Comprovamos que no recojamos una categoria o una subcategoria no correspondiente
+            
+                                                // Ruda de la subcategoria
+                                                $ruta_subcategoria = $categoryNode->attr('href');
+                                                // Recoger la id
+            
+                                                // Añadimos en la base de datos la subcategoria de esta tienda
+                                                $this->crearSubcategoriaTienda($nombreCategoriaYSubcategoria, $ruta_subcategoria);
+            
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
+
+
                             }
                         }
-
                     });
-                    echo "SALIMOS";
+                    echo "<br> SALIMOS";
                     break;
                 }
                 echo "<br> ------------------------ CONTINUAMOS" ;

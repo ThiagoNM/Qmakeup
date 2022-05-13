@@ -109,7 +109,7 @@ Route::get('/', [App\Http\Controllers\ProductoController::class, 'top'])->name('
 Route::get('/marcas', [App\Http\Controllers\ProductoController::class, 'marcas'])->name('marcas');
 Route::get('/categorias', [App\Http\Controllers\ProductoController::class, 'categorias'])->name('categorias');
 Route::get('/categoria', [App\Http\Controllers\ProductoController::class, 'categorias'])->name('categorias');
-Route::get('/perfil', [App\Http\Controllers\UpdateUsersController::class, 'edit'])->name('edit');
+Route::get('/perfil', [App\Http\Controllers\UpdateUsersController::class, 'edit'])->name('perfil');
 Route::get('/update', [App\Http\Controllers\UpdateUsersController::class, 'update'])->name('update');
 Route::get('/cambiar', [App\Http\Controllers\CambiarController::class, 'edit'])->name('ea');
 Route::put('/cambiar', [App\Http\Controllers\CambiarController::class, 'update'])->name('password_update');
