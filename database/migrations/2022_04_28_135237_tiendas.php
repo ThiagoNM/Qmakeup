@@ -15,7 +15,7 @@ class Tiendas extends Migration
     {
         Schema::create('tiendas', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
+            $table->string('nombre')->unique();
             $table->decimal('gastos_peninsula', 4,2);
             $table->decimal('gastos_baleares', 4,2);
             $table->decimal('gastos_minimos', 4,2);

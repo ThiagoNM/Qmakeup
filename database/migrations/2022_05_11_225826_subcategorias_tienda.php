@@ -19,6 +19,9 @@ class SubcategoriasTienda extends Migration
             $table->foreignId('id_subcategoria')
                     ->references('id')->on('subcategorias');
             $table->string('url_categoria');
+            $table->foreignId('id_tienda')
+                ->references('id')->on('tiendas');
+            $table->timestamps();
         });
 
     }
@@ -32,6 +35,7 @@ class SubcategoriasTienda extends Migration
     {
         Schema::table('subcategorias_tiendas', function ($table){
             $table -> dropForeign(['id_subcategoria']);
+            $table -> dropForeign(['id_tienda']);
         });
         Schema::dropIfExists('subcategorias_tiendas');
     }

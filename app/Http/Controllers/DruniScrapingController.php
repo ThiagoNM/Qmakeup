@@ -6,153 +6,44 @@ use Goutte\Client;
 use Illuminate\Http\Request;
 use Symfony\Component\DomCrawler\Crawler;
 use App\Models\Producto;
+use App\Models\Tienda;
+use App\Models\PaginaExterna;
+use App\Models\Categoria;
+use App\Models\Subcategoria;
+use App\Models\Precio;
+use Illuminate\Support\Facades\Redirect;
+
 
 class DruniScrapingController extends Controller
 {
-    private $nombre = "Druni";
+    private $nombreTienda = "druni";
+    private $url = "https://www.druni.es/";
+    private $id_tienda = 0;
+
+
     private $limiteArticulos = 1;
     private $lastPage = 1;
     private $itemsXPage = 24;
 
 
-    public function productsCategory(Client $client)
-    {
-        $itemLimit = $this->limiteArticulos;
-        $ultimaPagina = $this->lastPage;
-        $articulosXPagina = $this->itemsXPage;
-
-        // Filtramos el objeto para "crawler" para obtener la cantidad de articulos que hay
-        
-        // Categoria::all();
-        $subcategorias = ['labios']; 
-        foreach ($subcategorias as $subcategoria) {
-
-            $pageUrl = "https://www.druni.es/maquillaje/{$subcategoria}";
-
-            // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
-            $crawler = $client->request('GET', $pageUrl);
-            $inlineArtId = '"maincontent"';
-            $limiteArt = $crawler->filter("[id=$inlineArtId]")->each(function($NumNode) {
-
-                // Filtramos el contenedor para recoger una información especifica
-                $limiteArt = $NumNode->filter("[class='toolbar-number']")->first()->text();
-                return $limiteArt;
-            }); 
-            $limiteArt = intval($limiteArt[0]);
-            $this->limiteArticulos = $limiteArt;
-
-            $ultPagina = $limiteArt / $articulosXPagina;
-            $ultPagina = intval(ceil($ultPagina));
-            $this->lastPage = $ultPagina;
-            echo "UltimaPagina: " . $ultPagina;
-
-            // -----------------------------------------------------------
-
-            $this->extractProductsFrom($crawler, $client ,$subcategoria);
-            
-        }
-    }
-
-
-    public function extractProductsFrom(Crawler $crawler,Client $client ,$subcategoria)
-    {
-        $ultPagina =  $this->lastPage;
-        for ($i = 1; $i<=$ultPagina; $i++)
-        {
-            $pageUrl = "https://www.druni.es/maquillaje/{$subcategoria}?p={$i}";
-
-            // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
-            $crawler = $client->request('GET', $pageUrl);
-
-
-            echo "<br> Pagina: " . $pageUrl;
-            echo "<br> subcategoria: " . $subcategoria . "<br>";
-        
-            // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
-            // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
-            $inlineProductStyles = '"item product product-item"';
-
-            // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
-            // con EACH iteramos cada nodo del objeto CRAWLER
-            $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode, $subcategoria) {
-
-
-                // Comprovar si no esta agotado
-                $divAgotado = $productNode->filter("[class='product-item-inner']");
-                $estaAgotado = $divAgotado->filter("[class='stock unavailable']")->count();
-
-
-                if($estaAgotado == 0)
-                {
-                    // Filtramos el contenedor para recoger una información especifica
-                    $img = $productNode->filter("[class='product-image-photo']")->first()->attr('src');
-
-                    $nombre = $productNode->filter("[class='product-item-link']")->first()->text();
-                    echo "<br> Nombre: " . $nombre;
-                    
-                    $marca = $productNode->filter("[class='product-brand']")->first()->text();
-                    $descripcion = $productNode->filter("[class='product description product-item-description']")->first()->text();
-                    $precioNode = $productNode->filter("[data-price-type='finalPrice']")->first()->text();
-                    
-                    // Si no tiene el producto un contenedor con la clase "price-container price-final_price tax weee" buscar con la data-price-type "finalPrice"
-                    
-                    $precioDirty = explode("€", $precioNode);
-                    $precioClean = trim($precioDirty[0]);
-
-                    $precioFormat = str_replace(',','.',$precioClean);
-                    $precio = floatval($precioFormat);
-                    echo "<br> Precio: " . $precio . "<br>";
-                    $valoracion = 0;
-                    $idPagina = 1;
-
-                    // $product = $this->createProducto($img, $marca, $precio, $nombre, $subcategoria, $descripcion, $valoracion, $idPagina );
-                    // $product = $this->createPrecios($idProducto ,$idPagina, $precio);
-
-                }
-
-            }); 
-
-        }
-
-
-
-    }
-
-    public function createProductos($img ,$marca, $precio, $nombre, $subcategoria, $descripcion, $valoracion, $idPagina )
-    {
-        Productos::create([
-            "imagen" => $img,
-            "nombre" => $nombre,
-            "marca" => $marca,
-            'id_subcategoria' => $subcategoria,
-            "descripcion" => $descripcion,
-            'valoracion'=> 0,
-            'id_pagina'=> $idPagina
-        ]);
-    }
-
-    public function createPrecios($idProducto ,$idPagina, $precio)
-    {
-        Precios::create([
-            "id_producto" => $idProducto,
-            'id_pagina'=> $idPagina,
-            "precio" => $precio,
-        ]);
-    }
 
     // RECOGER DATOS DE GASTOS DE ENVIO DE LA PÁGINA
     public function shippingCostData(Client $client)
     {
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
-        $crawler = $client->request('GET', 'https://ayuda.druni.es/hc/es/articles/360012996559-Gastos-y-m%C3%A9todos-de-env%C3%ADo-');
+        $crawler = $client->request('GET', 'https://ayuda.druni.es/hc/es/articles/360012996559-Gastos-y-metodos-de-envio-');
         $this->extractShippingCostsFrom($crawler,);
+
     }
 
     public function extractShippingCostsFrom(Crawler $crawler)
     {
-
+       
+        $this->crearTienda("fadsf" , 3.33, 4.4, 10 );
+    
+        return "hola munddoi";
         // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
-        $inlineProductStyles = '"container"';
+        $inlineProductStyles = '"article-info"';
 
         // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
         // con EACH iteramos cada nodo del objeto CRAWLER
@@ -193,22 +84,255 @@ class DruniScrapingController extends Controller
             $gastosBaleares = floatval($gastosBalearesClean);
 
 
-            //Nombre de la tienda
-            $nombre = $this->nombre;
-            $this->crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
+            // Añadir en la base de datos la información sobre la tienda y la pagina web
+            $this->crearTienda($nombreTienda ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
+
+            // Recoger Id de la tienda
+            $id_tienda = $this->recogerIdTienda();
+
+            $this->crearPaginaExterna();
             
+            $client = new Client();
+            $product = $this->pageDate($client);
+
         }); 
+
     }
 
-    public function crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos )
+
+
+    public function pageDate(Client $client)
     {
-        Tiendas::create([
-            "nombre" => $nombre,
-            "gastos_peninsula" => $gastosPeninsula,
-            "gastos_baleares" => $gastosBaleares,
-            'gastos_minimos' => $gastosMinimos,
+        // Recoger atributos
+        $itemLimit = $this->limiteArticulos;
+        $ultimaPagina = $this->lastPage;
+        $articulosXPagina = $this->itemsXPage;
+
+        // Filtramos el objeto para "crawler" para obtener la cantidad de articulos que hay
+        $categorias = Categoria::all();
+        foreach ($categorias as $categoria) 
+        {
+            $nombreCategoria = $categoria->nombre;
+
+            $subcategorias = Subcategoria::all();
+            foreach ($subcategorias as $subcategoria) 
+            {
+                $nombreSubcategoria = $subcategoria->nombre;
+                // dd($nombreCategoria, $nombreSubcategoria);
+                $pageUrl = "https://www.druni.es/maquillaje/{$nombreCategoria}/{$nombreSubcategoria}";
+
+                // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
+                $crawler = $client->request('GET', $pageUrl);
+                $inlineArtId = '"maincontent"';
+                $limiteArt = $crawler->filter("[id=$inlineArtId]")->each(function($NumNode) {
+
+                    // Filtramos el contenedor para recoger una información especifica
+                    $limiteArt = $NumNode->filter("[class='toolbar-number']")->first()->text();
+                    return $limiteArt;
+                }); 
+                $limiteArt = intval($limiteArt[0]);
+                $this->limiteArticulos = $limiteArt;
+
+                $ultPagina = $limiteArt / $articulosXPagina;
+                $ultPagina = intval(ceil($ultPagina));
+                $this->lastPage = $ultPagina;
+
+                $this->extractProductsFrom($crawler, $client ,$nombreSubcategoria);
+            }
+        }
+
+    }
+
+
+    public function extractProductsFrom(Crawler $crawler,Client $client ,$nombreSubcategoria)
+    {
+        $ultPagina =  $this->lastPage;
+        for ($i = 1; $i<=$ultPagina; $i++)
+        {
+            $pageUrl = "https://www.druni.es/maquillaje/{$nombreSubcategoria}?p={$i}";
+
+            // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
+            $crawler = $client->request('GET', $pageUrl);
+
+            // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
+            // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
+            $inlineProductStyles = '"item product product-item"';
+
+            // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
+            // con EACH iteramos cada nodo del objeto CRAWLER
+            $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode, $nombreSubcategoria) {
+
+
+                // Comprovar si no esta agotado
+                $divAgotado = $productNode->filter("[class='product-item-inner']");
+                $estaAgotado = $divAgotado->filter("[class='stock unavailable']")->count();
+
+
+                if($estaAgotado == 0)
+                {
+                    // Filtramos el contenedor para recoger una información especifica
+                    $img = $productNode->filter("[class='product-image-photo']")->first()->attr('src');
+
+                    $nombreProducto = $productNode->filter("[class='product-item-link']")->first()->text();
+                    
+                    $marca = $productNode->filter("[class='product-brand']")->first()->text();
+                    $descripcion = $productNode->filter("[class='product description product-item-description']")->first()->text();
+                    $precioNode = $productNode->filter("[data-price-type='finalPrice']")->first()->text();
+                    
+                    // Si no tiene el producto un contenedor con la clase "price-container price-final_price tax weee" buscar con la data-price-type "finalPrice"
+                    $precioDirty = explode("€", $precioNode);
+                    $precioClean = trim($precioDirty[0]);
+
+                    $precioFormat = str_replace(',','.',$precioClean);
+                    $precio = floatval($precioFormat);
+
+
+                    $this->crearProducto($img , $nombreProducto , $marca, $descripcion );
+                    
+                    // Recoger id producto
+                    $id_producto = $this->recogerIdProducto($nombreProducto);
+
+                    $this->crearPrecio($id_producto, $precio);
+                }
+            }); 
+        }
+    }
+
+    // IdTienda
+    public function recogerIdTienda()
+    {
+        //Nombre de la tienda
+        $nombreTienda = $this->nombreTienda;
+
+        $tiendas = Tienda::all();
+        foreach ($tiendas as $tienda)
+        {
+            if ($tienda->nombre == $nombreTienda)
+            {
+                return $tienda->id;
+            }
+            // else{
+            //     return redirect()->route('index')->with('error', 'Error searching store id');            
+            // }
+        }   
+    }
+
+    
+    // IdSubcategoria
+    public function recogerIdSubcategoria($nombreSubcategoria)
+    {
+        $this->recogerIdTienda();
+        $subcategorias = Subcategoria::all();
+        foreach ($subcategorias as $subcategoria)
+        {
+            if ($subcategoria->nombre == $nombreSubcategoria)
+            {
+                return $subcategoria->id;
+            }
+            // else{
+            //     return redirect()->route('/')->with('error', 'Error searching category id');            
+            // }
+        }
+    }
+
+    // IdProducto
+    public function recogerIdProducto($nombreProducto)
+    {
+        $productos = Producto::all();
+        foreach ($productos as $producto)
+        {
+            if ($producto->nombre == $nombreProducto)
+            {
+                return $producto->id;
+            }
+            // else{
+            //     return redirect()->route('/')->with('error', 'Error searching product id');            
+            // }
+        }
+    }
+
+
+    // Crear tienda
+    public function crearTienda($nombreTienda ,$gastosPeninsula, $gastosBaleares, $gastosMinimos )
+    {
+        //echo "Bien";
+        // $createDB = Tienda::create([
+        //     "nombre" => $nombreTienda,
+        //     "gastos_peninsula" => $gastosPeninsula,
+        //     "gastos_baleares" => $gastosBaleares,
+        //     'gastos_minimos' => $gastosMinimos,
+        // ]);
+        return "true";
+    }
+
+    // Crear pagina externa 
+    public function crearPaginaExterna()
+    {
+        //Url de la tienda
+        $url = $this->url;
+        //Url de la tienda
+        $id_tienda = $this->id_tienda;
+
+        $createDB = PaginaExterna::create([
+            "url" => $url,
+            "id_tienda" => $id_tienda,
         ]);
+        // if ($createDB)
+        // {
+        //     return redirect()->route('/')->with('success', 'Tienda created successfully.');
+
+        // }
+        // else{
+        //     return redirect()->route('/')->with('error', 'Error creating PaginaExterna');            
+        // }
     }
     
-    
+    // Crear producto 
+    public function crearProducto($img , $nombreProducto , $marca , $descripcion, $valoracion )
+    {
+        // Recoger id subcategoria
+        $id_subcategoria = $this->recogerIdSubcategoria($subcategoria);
+        // Recoger id de la pagina
+        $id_pagina = $this->id_pagina;
+        $valoracion = 0;
+
+        $createDB = Producto::create([
+            "imagen" => $img,
+            "nombre" => $nombreProducto,
+            "marca" => $marca,
+            'id_subcategoria' => $id_subcategoria,
+            "descripcion" => $descripcion,
+            'valoracion'=> $valoracion,
+            'id_pagina'=> $id_pagina
+        ]);
+        // if ($createDB)
+        // {
+        //     return redirect()->route('/')->with('success', 'Tienda created successfully.');
+
+        // }
+        // else{
+        //     return redirect()->route('/')->with('error', 'Error creating Producto');            
+        // }
+    }
+
+    // Crear precios 
+    public function crearPrecio($id_producto , $precio)
+    {
+        // Recoger id de la pagina
+        $id_pagina = $this->id_pagina;
+
+        $createDB = Precio::create([
+            "id_producto" => $id_producto,
+            'id_pagina'=> $id_pagina,
+            "precio" => $precio,
+        ]);
+        // if ($createDB)
+        // {
+        //     return redirect()->route('/')->with('success', 'Tienda created successfully.');
+
+        // }
+        // else{
+        //     return redirect()->route('/')->with('error', 'Error creating Precio');            
+        // }
+    }
 }

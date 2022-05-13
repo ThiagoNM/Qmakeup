@@ -18,6 +18,7 @@ class Subcategorias extends Migration
             $table->string('nombre');
             $table->foreignId('id_categoria')
                     ->references('id')->on('categorias');
+            $table->timestamps();
         });
     }
 

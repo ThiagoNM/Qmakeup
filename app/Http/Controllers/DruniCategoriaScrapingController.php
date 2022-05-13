@@ -6,11 +6,22 @@ use Goutte\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use App\Models\CategoriaScraping;
 use Illuminate\Http\Request;
+use App\Models\CategoriaTienda;
+use App\Models\SubcategoriaTienda;
+use App\Models\PaginaExterna;
+use App\Models\Tienda;
+use App\Models\Categoria;
+use App\Models\Subcategoria;
+
 
 class DruniCategoriaScrapingController extends Controller
 {
-
+    private $nombre = "druni";
     private $pageUrl = "https://www.druni.es";
+
+
+    private $id_tienda = 1;
+
     
     public function category(Client $client)
     {
@@ -24,7 +35,6 @@ class DruniCategoriaScrapingController extends Controller
 
     public function extractCategoryFrom(Crawler $crawler)
     {
-
         // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
         $inlineProductStyles = '"ui-menu-dropdown depth-1"';
 
@@ -34,55 +44,82 @@ class DruniCategoriaScrapingController extends Controller
             // Recogemos todas las 'a' 
             $a = $categoryNode->filter('a')->text();
             // Nombre de la categoria sin espacios
-            $categoria = trim($a);
+            $nombreCategoria = trim($a);
+            $nombreCategoria = strtolower($nombreCategoria);
+            $nombreCategoria = $this->limpiarAcentos($nombreCategoria);
 
-            // Recogemos las categorias que tenemos de la tabla CATEGORIAS
-            // Categorias::all();
-            $ListCategory = ['Rostro', 'Ojos', 'Labios'];
+            // Recoger categorias
+            $ListCategory = $this->recogerCategorias();
             $countListCat = count($ListCategory);
-
             // Comprovamos que es la categoria que nos interesa
             for ($i = 0; $i<$countListCat; $i++)
             {
-                if ($categoria == $ListCategory[$i])
-                {
-                    echo("Categoria: " . $categoria . "<br>");
 
+                similar_text($ListCategory[$i], $nombreCategoria, $porciento);
+
+                if ($porciento > 80)
+                { 
                     // Recogemos la ruta de la categoria
                     $ruta_categoria = $categoryNode->filter('a')->attr('href');
-                    echo  "Ruta: " . $ruta_categoria . "<br>";
 
-                    // Volvemos a filtrar la página para obtener las subclases 
+                    $id_tienda = $this->id_tienda;
+                    // Añadimos en la base de datos la categoria de esta tienda
+                    $this->crearCategoriaTienda($nombreCategoria, $ruta_categoria);
+
+                    // Volvemos a filtrar la página para obtener las subclases pero por ello tendremos que volver a recorrerlo y volveremos a encontrarnos con categorias
                     $pageUrl = $this->pageUrl;
                     $client = new Client();
-
                     $inlineProductStyles = '"menuitem"';
-
                     $categoryNode->filter("[role=$inlineProductStyles]")->each(function($categoryNode) {
-                        // Nombre de la subcategoria sin espacios
-                        $subCategoria = trim($categoryNode->text());
-                        echo "Subcategoria: " . $subCategoria . "<br>";
-
-                        $ListCategory = ['Rostro', 'Ojos', 'Labios'];
-                        $countListCat = count($ListCategory);
                         
-                        for ($i = 0; $i<$countListCat; $i++)
-                        {   
-                            // Comprovamos que no recojamos una categoria
-                            if (!in_array($subCategoria, $ListCategory))
+                        // Nombre de la categoria o subcategoria sin espacios
+                        $nombreCategoriaYSubcategoria = trim($categoryNode->text());
+                        $nombreCategoriaYSubcategoria = $this->limpiarAcentos($nombreCategoriaYSubcategoria);
+                        $nombreCategoriaYSubcategoria = strtolower($nombreCategoriaYSubcategoria);
+                        
+                        $ListCategory = $this->recogerCategorias();
+                        // Comprovamos de recoger las subcategorias de las categorias que nos interesan 
+
+                        if (in_array($nombreCategoriaYSubcategoria, $ListCategory))
+                        {
+                            $ListSubcategory = $this->recogerSubcategorias();
+                            echo ("<br> Es una categoria: " . $nombreCategoriaYSubcategoria);
+                            
+                            if  (in_array($nombreCategoriaYSubcategoria, $ListSubcategory))
                             {
-                                echo "-----------ENTRA!!--------------------" . "<br>";
-                                // Ruda de la subcategoria
-                                $ruta_subcategoria = $categoryNode->attr('href');
-                                echo "Ruta subcategoria: " . $ruta_subcategoria . "<br>";
-                                echo "<br>";
-                                break;
-                                // $this->createSubcategoriaPagina($subCategoria, $ruta_subcategoria, $idPagina );
+                                echo "<br> Es una Subcategoria: " . $nombreCategoriaYSubcategoria;
+                                // Recoger subcategorias
+                                $ListSubcategory = $this->recogerSubcategorias();
+                                $countListSubcat = count($ListSubcategory);
+                                for ($i = 0; $i<$countListSubcat; $i++)
+                                {   
+    
+                                    // Recoger subcategorias
+                                    $ListSubcategory = $this->recogerSubcategorias();
+    
+                                    similar_text($ListSubcategory[$i], $nombreCategoriaYSubcategoria, $porciento);
+                                    if ($porciento > 80)
+                                    {
+                                        // Comprovamos que no recojamos una categoria o una subcategoria no correspondiente
+    
+                                        // Ruda de la subcategoria
+                                        $ruta_subcategoria = $categoryNode->attr('href');
+                                        // Recoger la id
+    
+                                        // Añadimos en la base de datos la subcategoria de esta tienda
+                                        $this->crearSubcategoriaTienda($nombreCategoriaYSubcategoria, $ruta_subcategoria);
+    
+                                        break;
+                                    }
+                                }
                             }
                         }
-                    });
 
+                    });
+                    echo "SALIMOS";
+                    break;
                 }
+                echo "<br> ------------------------ CONTINUAMOS" ;
             }
         });
 
@@ -90,22 +127,103 @@ class DruniCategoriaScrapingController extends Controller
     }
 
 
-    public function createCategoriaPagina($categoria, $ruta_categoria, $idPagina)
+
+    // Recoger las categorias
+    public function recogerCategorias()
     {
-        Categoria_pagina::create([
-            "nombre" => $categoria,
-            'ruta_categoria' => $ruta_categoria,
-            'id_pagina'=> $idPagina
+        $categorias = Categoria::all();
+        $ListCategory = [];
+        foreach($categorias as $categoria)
+        {
+            array_push($ListCategory, $categoria->nombre) ;
+        }
+        return $ListCategory;
+    }
+
+    // Recoger las subcategorias
+    public function recogerSubcategorias()
+    {
+        $subcategorias = Subcategoria::all();
+        $ListSubcategory = [];
+        foreach($subcategorias as $subcategoria)
+        {
+            $NomSubcategoria = $this->limpiarAcentos($subcategoria->nombre);
+            $NomSubcategoria = strtolower($NomSubcategoria);
+            array_push($ListSubcategory, $NomSubcategoria) ;
+        }
+        return $ListSubcategory;
+    }
+
+    // IdSubcategoria
+    public function limpiarAcentos($cadena)
+    {
+        $no_permitidas= array ("á","é","í","ó","ú","ñ","à","è","è","ò","ù");
+        $permitidas= array ("a","e","i","o","u","n","a","e","i","o","u");
+        $texto = str_replace($no_permitidas, $permitidas ,$cadena);
+        return $texto;
+    }
+
+    
+    // IdSubcategoria
+    public function recogerIdTienda()
+    {
+        $nombre = $this->nombre;
+
+        $tienda = Tienda::all()->where('nombre', '=',$nombre)->first();
+        $id_tienda = $tienda->id;
+        return $id_tienda ;
+    }
+
+    // Id Categoria
+    public function recogerIdCategoria($nombreCategoria)
+    {
+        $categorias = Categoria::all()->where('nombre', '=',$nombreCategoria)->first();
+        $id_categoria = $categorias->id;
+        return $id_categoria ;
+    }
+
+    // Id Subcategoria
+    public function recogerIdSubcategoria($nombreCategoriaYSubcategoria)
+    {
+        $subcategorias = Subcategoria::all();
+        foreach($subcategorias as $subcategoria)
+        {
+            $NombreSubC = $subcategoria->nombre;
+            $nombreCategoriaYSubcategoria = $this->limpiarAcentos($NombreSubC);
+            $NombreSubC = strtolower($NombreSubC);
+            similar_text($NombreSubC, $nombreCategoriaYSubcategoria, $porciento);
+            if ($porciento > 80)
+            {
+
+                $id_subcategoria = $subcategoria->id;
+                
+                return $id_subcategoria ;
+            }
+        }
+    }
+
+    public function crearCategoriaTienda($nombreCategoria, $ruta_categoria)
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $id_categoria = $this->recogerIdCategoria($nombreCategoria);
+        CategoriaTienda::create([
+            'nombre' => $nombreCategoria,
+            'id_categoria' => $id_categoria,
+            'url_categoria' => $ruta_categoria,
+            'id_tienda' => $id_tienda
         ]);
     }
     
     
-    public function createSubcategoriaPagina($subCategoria, $ruta_subcategoria, $idPagina)
+    public function crearSubcategoriaTienda($nombreCategoriaYSubcategoria, $ruta_subcategoria)
     {
-        Subcategoria_pagina::create([
-            "nombre" => $subCategoria,
-            'ruta_subcategoria' => $ruta_subcategoria,
-            'id_pagina'=> $idPagina
+        $id_subcategoria = $this->recogerIdSubcategoria($nombreCategoriaYSubcategoria);
+        $id_tienda = $this->recogerIdTienda();
+        SubcategoriaTienda::create([
+            'nombre' => $nombreCategoriaYSubcategoria,
+            'id_subcategoria' => $id_subcategoria,
+            'url_subcategoria' => $ruta_subcategoria,
+            'id_tienda' => $id_tienda
         ]);
     }
     

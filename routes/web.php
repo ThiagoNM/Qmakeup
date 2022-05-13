@@ -90,9 +90,8 @@ Route::get('/dashboard', function () {
 require __DIR__.'/auth.php';
 
 // Web Scraping
-Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'productsCategory']);
+Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'shippingCostData']);
 Route::get('/look', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory']);
-Route::get('/primor', [App\Http\Controllers\PrimorScrapingController::class, 'productsCategory']);
 Route::get('/maquillalia', [App\Http\Controllers\MaquillaliaScrapingController::class, 'productsCategory']);
 
 // Categorias de cada página
@@ -113,3 +112,5 @@ Route::get('/perfil', [App\Http\Controllers\UpdateUsersController::class, 'edit'
 Route::get('/update', [App\Http\Controllers\UpdateUsersController::class, 'update'])->name('update');
 Route::get('/cambiar', [App\Http\Controllers\CambiarController::class, 'edit'])->name('ea');
 Route::put('/cambiar', [App\Http\Controllers\CambiarController::class, 'update'])->name('password_update');
+
+Route::get('/prueba', [App\Http\Controllers\PruebaController::class, 'shippingCostData']);

@@ -13,6 +13,12 @@ class MaquillaliaScrapingController extends Controller
     private $lastPage = 1;
     private $itemsXPage = 20;
     private $nombre = "Maquillalia";
+    // Gastos de envio y minimos
+    private $gastosPeninsula = 0;
+    private $gastosBaleares = 0;
+    private $gastosMinimos= 0;
+
+
 
     public function productsCategory(Client $client)
     {
@@ -56,11 +62,7 @@ class MaquillaliaScrapingController extends Controller
         $ultPagina = $this->lastPage;
         for ($i = 0; $i<=$ultPagina; $i++)
         {
-            echo "<br> --------------- Pagina: " . $i . "<br>"; 
-
-            // $pageUrl = "https://www.maquillalia.com/{$categoria}.html?page={$i}";
-
-            echo "<br> url: " . $pageUrl . "<br>" ;
+            $pageUrl = "https://www.maquillalia.com/{$categoria}.html?page={$i}";
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             $crawler = $client->request('GET', $pageUrl);
 
@@ -117,8 +119,6 @@ class MaquillaliaScrapingController extends Controller
         $crawler->filter('u')->each(function($dataNode) {
 
             $comprovarPB = $dataNode->text();
-            echo "<br> Comprovar: " . $comprovarPB;
-
 
             // Comprovar si es peninsula o baleares
             if(str_contains($comprovarPB, "Península"))
@@ -142,6 +142,7 @@ class MaquillaliaScrapingController extends Controller
                     $gastosPeninsulaClean = str_replace(',','.',$gastosPeninsulaUncleanArray);
 
                     $gastosPeninsula =  floatval($gastosPeninsulaClean);
+                    $this->gastosPeninsula = $gastosPeninsula;
                     echo "<br> ---- Peninsula: " . $gastosPeninsula;
 
                     // Gastos minimos 
@@ -149,6 +150,8 @@ class MaquillaliaScrapingController extends Controller
 
                     $gastosMinimos =  intval($gastosMinimosUnclean[0]);
                     echo "<br> Gastos minimos: " . $gastosMinimos ;
+                    $this->gastosMinimos = $gastosMinimos;
+
                 });
             }
             elseif(str_contains($comprovarPB, "Baleares"))
@@ -163,13 +166,19 @@ class MaquillaliaScrapingController extends Controller
                 $gastosBalearesSymbol = explode("€", $gastosBalearesClean);
                 $gastosBaleares = $gastosBalearesSymbol[0];
                 echo "<br> ---- Baleares: " . $gastosBaleares;
+                $this->gastosBaleares = $gastosBaleares;
             }
 
-            // Nombre de la tienda
-            $nombre = $this->nombre;
-            $this->crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
-            
         }); 
+        // Recoger atributos
+        $gastosPeninsula = $this->gastosPeninsula;
+        $gastosBaleares = $this->gastosBaleares;
+        $gastosMinimos = $this->gastosMinimos;
+
+        // Nombre de la tienda
+        $nombre = $this->nombre;
+        // $this->crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
+        
     }
 
     public function crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos )
