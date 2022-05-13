@@ -20,6 +20,6 @@
       <label for="Password2">Confirm password</label>
       <input type="password" class="form-control" id="Password2" name="password_confirmation" required placeholder="Confirm password">
     </div>
-    <p class="text--form">Ya estas registrado? <a class="text--link" href="#">Iniciar sesión</a></p>
+    <p class="text--form">Ya estas registrado? <a class="text--link" href="{{ route('login') }}">Iniciar sesión</a></p>
     <button type="submit" class="boton--form">{{ __('Register') }}</button>
   </form>

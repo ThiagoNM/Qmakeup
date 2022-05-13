@@ -18,10 +18,9 @@
           <label for="Username">Usuario</label>
           <input type="text" class="form-control" id="Username" name="name" placeholder="{{ $user->name }}">
         </div>
-        <p class="text--form"><button type="submit"class="text--link" >Actualizar nombre</button></p>
+        <p class="text--form"><button type="submit" class="boton--form" >Actualizar nombre</button></p>
+        <p class="text--form"><a class="text--link" href="{{route('ea')}}">Cambiar contraseña</a></p>
       </form>
-      <p class="text--form"><a class="text--link" href="{{route('ea')}}">Cambiar contraseña</a></p>
-
 
      
       
