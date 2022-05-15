@@ -6,11 +6,18 @@ use Goutte\Client;
 use Illuminate\Http\Request;
 use Symfony\Component\DomCrawler\Crawler;
 use App\Models\Producto;
+use App\Models\Tienda;
+use App\Models\CategoriaTienda;
+use App\Models\SubcategoriaTienda;
+use App\Models\PaginaExterna;
+use App\Models\Precio;
+
 
 class LookfantasticScrapingController extends Controller
 {
-    private $nombre = "Lookfantastic";
+    private $nombreTienda = "lookfantastic";
     private $url = "https://www.lookfantastic.es/";
+    private $urlSubcategoria = "";
 
     // Gastos de envio y minimos
     private $gastosPeninsula = 0;
@@ -19,16 +26,19 @@ class LookfantasticScrapingController extends Controller
 
     public function productsCategory(Client $client)
     {
-        // Categoria::all();
-        $subcategorias = ['complexion.list']; 
+        $subcategorias = $this->recogerSubcategoriaTienda();
         foreach ($subcategorias as $subcategoria) {
-            $pageUrl = "https://www.lookfantastic.es/health-beauty/make-up/{$subcategoria}";
+
+            $urlSubcategoria = $subcategoria->url_subcategoria;
+            $this->urlSubcategoria = $urlSubcategoria;
+            $pageUrl = "$urlSubcategoria";
+
             $crawler = $client->request('GET', $pageUrl);
 
             $lastPage = $this->extractlastPage($crawler);
             for ($i = 0; $i<=$lastPage[0]; $i++)
             {
-                $pageUrl = "https://www.lookfantastic.es/health-beauty/make-up/{$subcategoria}?pageNumber={$i}";
+                $pageUrl = $urlSubcategoria . "?pageNumber={$i}";
             
                 // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
                 $crawler = $client->request('GET', $pageUrl);
@@ -52,17 +62,22 @@ class LookfantasticScrapingController extends Controller
             if ($stock != "PRÓXIMAMENTE")
             {
 
-                // Filtramos el contenedor para recoger una información especifica
-                $precioNode = $productNode->filter("[class='productBlock_price']")->first()->text();
-                
-                $precioDirty = explode("€", $precioNode);
-                $precioClean = trim($precioDirty[0]);
+                $nombreProducto = $productNode->filter("[class='productBlock_productName']")->first()->text();
+                $id_producto = $this->recogerIdProducto($nombreProducto);
+                if ($id_producto != null)
+                {
+                    // Filtramos el contenedor para recoger una información especifica
+                    $precioNode = $productNode->filter("[class='productBlock_price']")->first()->text();
+                    
+                    $precioDirty = explode("€", $precioNode);
+                    $precioClean = trim($precioDirty[0]);
 
-                $precioFormat = str_replace(',','.',$precioClean);
-                $precio = floatval($precioFormat);
+                    $precioFormat = str_replace(',','.',$precioClean);
+                    $precio = floatval($precioFormat);
 
-                $product = $this->crearPaginasExternas($idProducto, $idPagina, $precio);
-                $product = $this->crearPrecios($idProducto, $idPagina, $precio);
+                    dd("entra");
+                    $this->crearPrecios($id_producto, $precio);
+                }
 
             }
 
@@ -94,6 +109,7 @@ class LookfantasticScrapingController extends Controller
         $this->extractShippingCostsFrom($crawler,);
     }
 
+    // Recogemos la información sobre los gastos de envio
     public function extractShippingCostsFrom(Crawler $crawler)
     {
         // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
@@ -126,21 +142,63 @@ class LookfantasticScrapingController extends Controller
                 $this->gastosMinimos=$gastosMinimos;
 
                 //Nombre de la tienda
-                $nombre = $this->nombre;
+                $nombreTienda = $this->nombreTienda;
                 $gastosPeninsula = $this->gastosPeninsula;
                 $gastosBaleares = $this->gastosBaleares;
                 $gastosMinimos = $this->gastosMinimos;
 
-                // $this->crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
+                $this->crearTiendas($gastosPeninsula, $gastosBaleares, $gastosMinimos );
+                $this->crearPaginasExternas();
                 $cont ++;
             }
         }); 
     }
-    // Crear tienda
-    public function crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos )
+
+
+
+    // IdProducto
+    public function recogerIdProducto($nombreProducto)
     {
-        Tiendas::create([
-            "nombre" => $nombre,
+        $productos = Producto::all();
+        foreach ($productos as $producto)
+        {
+            $NameProduct = $producto->nombre;
+            similar_text($nombreProducto, $NameProduct, $porciento);
+            echo "<br> PORCENTAJE: ". $porciento;
+            if ($porciento > 60)
+            {
+                dd("entra");
+                return $producto->id;
+            }
+            // else{
+            //     return redirect()->route('/')->with('error', 'Error searching product id');            
+            // }
+        }
+    }
+
+    public function recogerSubcategoriaTienda()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $subcategorias = SubcategoriaTienda::all()->where('id_tienda', '=',$id_tienda);
+        return $subcategorias;
+    }
+
+    
+    // Id de la tienda en la que estamos
+    public function recogerIdTienda()
+    {
+        $nombreTienda = $this->nombreTienda;
+        $tienda = Tienda::all()->where('nombre', '=',$nombreTienda)->first();
+        $id_tienda = $tienda->id;
+        return $id_tienda ;
+    }
+
+    // Crear tienda
+    public function crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos )
+    {
+        $nombreTienda = $this->nombreTienda;
+        $createDB = Tienda::create([
+            "nombre" => $nombreTienda,
             "gastos_peninsula" => $gastosPeninsula,
             "gastos_baleares" => $gastosBaleares,
             'gastos_minimos' => $gastosMinimos,
@@ -148,21 +206,37 @@ class LookfantasticScrapingController extends Controller
     }
 
     // Crear pagina externa 
-    public function crearPaginasExternas($url ,$id_tienda )
+    public function crearPaginasExternas()
     {
-        Tiendas::create([
-            "url" => $url,
-            "id_tienda" => $id_tienda,
-        ]);
+        try {
+            //Url de la tienda
+            $url = $this->url;
+            //Url de la tienda
+            $id_tienda = $this->recogerIdTienda();
+
+
+            $createDB = PaginaExterna::create([
+                "url" => $url,
+                "id_tienda" => $id_tienda,
+            ]);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     // Guardar en la base de datos el precio
-    public function crearPrecios($id_producto ,$id_pagina, $precio)
+    public function crearPrecios($id_producto , $precio)
     {
-        Precios::create([
-            "id_producto" => $id_producto,
-            'id_pagina'=> $id_pagina,
-            "precio" => $precio,
-        ]);
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $createDB = Precio::create([
+                "id_producto" => $id_producto,
+                'id_tienda'=> $id_tienda,
+                "precio" => $precio,
+            ]);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
     }
 }

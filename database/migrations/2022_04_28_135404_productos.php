@@ -19,7 +19,7 @@ class Productos extends Migration
             $table->string('nombre')->unique();
             $table->string('marca');
             $table->foreignId('id_subcategoria')
-                ->references('id')->on('subcategorias');
+                ->references('id')->on('subcategorias_tiendas');
             $table->string('descripcion');
             $table->integer('valoracion');
             $table->foreignId('id_tienda')

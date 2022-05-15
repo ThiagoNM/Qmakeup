@@ -6,13 +6,21 @@ use Goutte\Client;
 use Illuminate\Http\Request;
 use Symfony\Component\DomCrawler\Crawler;
 use App\Models\Producto;
+use App\Models\Tienda;
+use App\Models\PaginaExterna;
+use App\Models\CategoriaTienda;
+use App\Models\SubcategoriaTienda;
+use App\Models\Precio;
 
 class MaquillaliaScrapingController extends Controller
 {
     private $limiteArticulos = 1;
     private $lastPage = 1;
     private $itemsXPage = 20;
-    private $nombre = "Maquillalia";
+    private $nombreTienda = "maquillalia";
+    private $url = "https://www.lookfantastic.es/";
+    private $urlSubcategoria = "";
+    
     // Gastos de envio y minimos
     private $gastosPeninsula = 0;
     private $gastosBaleares = 0;
@@ -63,6 +71,7 @@ class MaquillaliaScrapingController extends Controller
         for ($i = 0; $i<=$ultPagina; $i++)
         {
             $pageUrl = "https://www.maquillalia.com/{$categoria}.html?page={$i}";
+            
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             $crawler = $client->request('GET', $pageUrl);
 
@@ -72,36 +81,35 @@ class MaquillaliaScrapingController extends Controller
                 // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
                 // con EACH iteramos cada nodo del objeto CRAWLER
                 $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode) {
-
-                    // Comprovar si tiene existencias
-                    $divStock = $productNode->filter("div");
-                    $aStock = $divStock->eq(3);
-                    $aNode = $productNode->filter("a");
-                    $stock = $aNode->filter("span")->count();
-                    // Si hay stock recoger los datos
-                    if ($stock != 1)                
+                    $divFather = $productNode->ancestors();
+                    $titleNode = $divFather->filter("[class='Title smtt']");
+                    $nombreProducto = $titleNode->text();
+                    $id_producto = $this->recogerIdProducto($nombreProducto);
+                    echo "<BR> ID PRODCUTO: " . $id_producto;
+                    if ($id_producto != null)
                     {
-                        echo "HA ENTRADO ---------------";
-                        $divs = $productNode->children()->filter('div');
-                        $precioString = $divs->attr('data-price');
-                        $precio = floatval($precioString);
-                        echo "<br> Precio: " . $precioString . "<br>" ;
-                    }
+                        dd("No es null");
 
-                    // $product = $this->extractProductInfo($img, $marca, $precio, $nombre, $categoria, $descripcion, $valoracion, $idPagina );
+                        // Comprovar si tiene existencias
+                        $divStock = $productNode->filter("div");
+                        $aStock = $divStock->eq(3);
+                        $aNode = $productNode->filter("a");
+                        $stock = $aNode->filter("span")->count();
+                        // Si hay stock recoger los datos
+                        if ($stock != 1)                
+                        {
+                            echo "HA ENTRADO ---------------";
+                            $divs = $productNode->children()->filter('div');
+                            $precioString = $divs->attr('data-price');
+                            $precio = floatval($precioString);
+                            echo "<br> Precio: " . $precioString . "<br>" ;
+                            $this->crearPrecio($id_producto, $precio);
+                        }
+                    }
                 }); 
         }
     }
 
-    // Nuevo
-    public function createPrecios($idProducto ,$idPagina, $precio)
-    {
-        Precios::create([
-            "id_producto" => $idProducto,
-            'id_pagina'=> $idPagina,
-            "precio" => $precio,
-        ]);
-    }
 
     // RECOGER DATOS DE GASTOS DE ENVIO DE LA PÁGINA
     public function shippingCostData(Client $client)
@@ -170,24 +178,146 @@ class MaquillaliaScrapingController extends Controller
             }
 
         }); 
+
+        dd("Hola");
+        // Nombre de la tienda
+        $this->crearTienda();
+        $this->crearPaginasExternas();
+    }
+
+    // Crear tienda
+    public function crearTienda()
+    {
         // Recoger atributos
         $gastosPeninsula = $this->gastosPeninsula;
         $gastosBaleares = $this->gastosBaleares;
         $gastosMinimos = $this->gastosMinimos;
+        $nombreTienda = $this->nombreTienda;
 
-        // Nombre de la tienda
-        $nombre = $this->nombre;
-        // $this->crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
-        
-    }
-
-    public function crearTiendas($nombre ,$gastosPeninsula, $gastosBaleares, $gastosMinimos )
-    {
-        Tiendas::create([
-            "nombre" => $nombre,
+        $createDB = Tienda::create([
+            "nombre" => $nombreTienda,
             "gastos_peninsula" => $gastosPeninsula,
             "gastos_baleares" => $gastosBaleares,
             'gastos_minimos' => $gastosMinimos,
+        ]);
+    }
+
+    public function recogerSubcategoriaTienda()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $subcategorias = SubcategoriaTienda::all()->where('id_tienda', '=',$id_tienda);
+        return $subcategorias;
+    }
+    
+
+    // IdTienda
+    public function recogerIdTienda()
+    {
+        //Nombre de la tienda
+        $nombreTienda = $this->nombreTienda;
+
+        $tiendas = Tienda::all();
+        foreach ($tiendas as $tienda)
+        {
+            if ($tienda->nombre == $nombreTienda)
+            {
+                return $tienda->id;
+            }
+            // else{
+            //     return redirect()->route('index')->with('error', 'Error searching store id');            
+            // }
+        }   
+    }
+
+    
+    // IdSubcategoria
+    public function recogerIdSubcategoria()
+    {
+        $urlSubcategoria = $this->urlSubcategoria;
+        $subcategorias = $this->recogerSubcategoriaTienda();
+        foreach ($subcategorias as $subcategoria)
+        {
+
+            echo "<br> SUBURL: ". $subcategoria->url   . "URL: ". $urlSubcategoria;
+            if ($subcategoria->url_subcategoria == $urlSubcategoria)
+            {
+                echo "<br> ------------------- SUBCATEGORIA ID: " . $subcategoria->id;
+
+                return $subcategoria->id;
+            }
+            // else{
+            //     return redirect()->route('/')->with('error', 'Error searching category id');            
+            // }
+        }
+    }
+
+    // IdProducto
+    public function recogerIdProducto($nombreProducto)
+    {
+        $id_subcategoria = $this->recogerIdSubcategoria();
+        $productos = Producto::all()->where("id_subcategoria" , "=" , $id_subcategoria );
+        foreach ($productos as $producto)
+        {
+            $NameProduct = $producto->nombre;
+            similar_text($nombreProducto, $NameProduct, $porciento);
+            echo "<br> PORCENTAJE: ". $porciento;
+            if ($porciento > 60)
+            {
+                dd("entra");
+                return $producto->id;
+            }
+            // else{
+            //     return redirect()->route('/')->with('error', 'Error searching product id');            
+            // }
+        }
+    }
+
+
+    // Crear pagina externa 
+    public function crearPaginaExterna()
+    {
+        try {
+            //Url de la tienda
+            $url = $this->url;
+            //Url de la tienda
+            $id_tienda = $this->recogerIdTienda();
+
+
+            $createDB = PaginaExterna::create([
+                "url" => $url,
+                "id_tienda" => $id_tienda,
+            ]);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+    }
+    
+    // Crear producto 
+    public function crearProducto($img , $nombreProducto , $marca , $descripcion, $id_subcategoria)
+    {
+        echo "<br> ID SUBCATEGORIA: " . $id_subcategoria;
+        $id_tienda = $this->recogerIdTienda();
+        $valoracion = 0;
+        Producto::create([
+            "imagen" => $img,
+            "nombre" => $nombreProducto,
+            "marca" => $marca,
+            'id_subcategoria' => $id_subcategoria,
+            "descripcion" => $descripcion,
+            'valoracion'=> $valoracion,
+            'id_tienda'=> $id_tienda
+        ]);
+    }
+
+    // Crear precios 
+    public function crearPrecio($id_producto , $precio)
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $createDB = Precio::create([
+            "id_producto" => $id_producto,
+            'id_tienda'=> $id_tienda,
+            "precio" => $precio,
         ]);
     }
 }

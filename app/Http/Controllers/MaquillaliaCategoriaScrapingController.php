@@ -105,11 +105,17 @@ class MaquillaliaCategoriaScrapingController extends Controller
     
     public function createSubcategoriaPagina($subCategoria, $ruta_subcategoria, $idPagina)
     {
-        Subcategoria_pagina::create([
-            "nombre" => $subCategoria,
-            'ruta_subcategoria' => $ruta_subcategoria,
-            'id_pagina'=> $idPagina
-        ]);
+        try {
+            Subcategoria_pagina::create([
+                "nombre" => $subCategoria,
+                'ruta_subcategoria' => $ruta_subcategoria,
+                'id_pagina'=> $idPagina
+            ]);
+        } catch (\Throwable $th) {
+            dd("Mal");
+        }
+
+        
     }
     
 

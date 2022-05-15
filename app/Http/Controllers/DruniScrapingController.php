@@ -8,8 +8,8 @@ use Symfony\Component\DomCrawler\Crawler;
 use App\Models\Producto;
 use App\Models\Tienda;
 use App\Models\PaginaExterna;
-use App\Models\Categoria;
-use App\Models\Subcategoria;
+use App\Models\CategoriaTienda;
+use App\Models\SubcategoriaTienda;
 use App\Models\Precio;
 use Illuminate\Support\Facades\Redirect;
 
@@ -19,7 +19,7 @@ class DruniScrapingController extends Controller
     private $nombreTienda = "druni";
     private $url = "https://www.druni.es/";
     private $id_tienda = 0;
-
+    private $urlSubcategoria = "";
 
     private $limiteArticulos = 1;
     private $lastPage = 1;
@@ -39,16 +39,12 @@ class DruniScrapingController extends Controller
     public function extractShippingCostsFrom(Crawler $crawler)
     {
        
-        $this->crearTienda("fadsf" , 3.33, 4.4, 10 );
-    
-        return "hola munddoi";
         // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
         $inlineProductStyles = '"article-info"';
 
         // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
         // con EACH iteramos cada nodo del objeto CRAWLER
         $crawler->filter("[class=$inlineProductStyles]")->each(function($dataNode) {
-
             // Filtramos el contenedor para recoger una información especifica
             $divs = $dataNode->filter("[class='article-body']")->first();
             // Gastos minimos 
@@ -83,18 +79,8 @@ class DruniScrapingController extends Controller
            
             $gastosBaleares = floatval($gastosBalearesClean);
 
-
             // Añadir en la base de datos la información sobre la tienda y la pagina web
-            $this->crearTienda($nombreTienda ,$gastosPeninsula, $gastosBaleares, $gastosMinimos );
-
-            // Recoger Id de la tienda
-            $id_tienda = $this->recogerIdTienda();
-
-            $this->crearPaginaExterna();
-            
-            $client = new Client();
-            $product = $this->pageDate($client);
-
+            // $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
         }); 
 
     }
@@ -109,48 +95,47 @@ class DruniScrapingController extends Controller
         $articulosXPagina = $this->itemsXPage;
 
         // Filtramos el objeto para "crawler" para obtener la cantidad de articulos que hay
-        $categorias = Categoria::all();
-        foreach ($categorias as $categoria) 
+
+        $subcategorias = $this->recogerSubcategoriaTienda();
+        foreach ($subcategorias as $subcategoria) 
         {
-            $nombreCategoria = $categoria->nombre;
+            $urlSubcategoria = $subcategoria->url_subcategoria;
+            $this->urlSubcategoria = $urlSubcategoria;
+            $pageUrl = "$urlSubcategoria";
+            // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
+            $crawler = $client->request('GET', $pageUrl);
 
-            $subcategorias = Subcategoria::all();
-            foreach ($subcategorias as $subcategoria) 
-            {
-                $nombreSubcategoria = $subcategoria->nombre;
-                // dd($nombreCategoria, $nombreSubcategoria);
-                $pageUrl = "https://www.druni.es/maquillaje/{$nombreCategoria}/{$nombreSubcategoria}";
+            $inlineArtId = '"maincontent"';
+            $limiteArt = $crawler->filter("[id=$inlineArtId]")->each(function($NumNode) {
+                // Filtramos el contenedor para recoger una información especifica
+                $limiteArt = $NumNode->filter("[class='toolbar-amount']")->first()->text();
 
-                // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
-                $crawler = $client->request('GET', $pageUrl);
-                $inlineArtId = '"maincontent"';
-                $limiteArt = $crawler->filter("[id=$inlineArtId]")->each(function($NumNode) {
+                return $limiteArt;
+            }); 
+            $limiteArt = intval($limiteArt[0]);
+            $this->limiteArticulos = $limiteArt;
 
-                    // Filtramos el contenedor para recoger una información especifica
-                    $limiteArt = $NumNode->filter("[class='toolbar-number']")->first()->text();
-                    return $limiteArt;
-                }); 
-                $limiteArt = intval($limiteArt[0]);
-                $this->limiteArticulos = $limiteArt;
+            $ultPagina = $limiteArt / $articulosXPagina;
+            $ultPagina = intval(ceil($ultPagina));
+            $this->lastPage = $ultPagina;
 
-                $ultPagina = $limiteArt / $articulosXPagina;
-                $ultPagina = intval(ceil($ultPagina));
-                $this->lastPage = $ultPagina;
-
-                $this->extractProductsFrom($crawler, $client ,$nombreSubcategoria);
-            }
+            $this->extractProductsFrom($crawler, $client);
         }
+        
 
     }
 
 
-    public function extractProductsFrom(Crawler $crawler,Client $client ,$nombreSubcategoria)
+    public function extractProductsFrom(Crawler $crawler,Client $client)
     {
+
         $ultPagina =  $this->lastPage;
         for ($i = 1; $i<=$ultPagina; $i++)
         {
-            $pageUrl = "https://www.druni.es/maquillaje/{$nombreSubcategoria}?p={$i}";
+            $urlSubcategoria = $this->urlSubcategoria;
 
+            $pageUrl = $urlSubcategoria . "?p={$i}";
+            echo "URL: " . $pageUrl ;
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             $crawler = $client->request('GET', $pageUrl);
 
@@ -160,8 +145,8 @@ class DruniScrapingController extends Controller
 
             // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
             // con EACH iteramos cada nodo del objeto CRAWLER
-            $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode, $nombreSubcategoria) {
-
+            $crawler->filter("[class=$inlineProductStyles]")->each(function($productNode) {
+            
 
                 // Comprovar si no esta agotado
                 $divAgotado = $productNode->filter("[class='product-item-inner']");
@@ -186,17 +171,27 @@ class DruniScrapingController extends Controller
                     $precioFormat = str_replace(',','.',$precioClean);
                     $precio = floatval($precioFormat);
 
-
-                    $this->crearProducto($img , $nombreProducto , $marca, $descripcion );
+                    $id_subcategoria = $this->recogerIdSubcategoria();
+                    echo "<br> ID SUBCATEGORIA: " . $id_subcategoria;
+                    echo "<br> Vamos a entrat";
+                    $this->crearProducto($img , $nombreProducto , $marca, $descripcion, $id_subcategoria);
                     
                     // Recoger id producto
                     $id_producto = $this->recogerIdProducto($nombreProducto);
-
-                    $this->crearPrecio($id_producto, $precio);
+                    // $this->crearPrecio($id_producto, $precio);
                 }
             }); 
         }
     }
+
+
+    public function recogerSubcategoriaTienda()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $subcategorias = SubcategoriaTienda::all()->where('id_tienda', '=',$id_tienda);
+        return $subcategorias;
+    }
+    
 
     // IdTienda
     public function recogerIdTienda()
@@ -219,14 +214,18 @@ class DruniScrapingController extends Controller
 
     
     // IdSubcategoria
-    public function recogerIdSubcategoria($nombreSubcategoria)
+    public function recogerIdSubcategoria()
     {
-        $this->recogerIdTienda();
-        $subcategorias = Subcategoria::all();
+        $urlSubcategoria = $this->urlSubcategoria;
+        $subcategorias = $this->recogerSubcategoriaTienda();
         foreach ($subcategorias as $subcategoria)
         {
-            if ($subcategoria->nombre == $nombreSubcategoria)
+
+            echo "<br> SUBURL: ". $subcategoria->url   . "URL: ". $urlSubcategoria;
+            if ($subcategoria->url_subcategoria == $urlSubcategoria)
             {
+                echo "<br> ------------------- SUBCATEGORIA ID: " . $subcategoria->id;
+
                 return $subcategoria->id;
             }
             // else{
@@ -253,16 +252,15 @@ class DruniScrapingController extends Controller
 
 
     // Crear tienda
-    public function crearTienda($nombreTienda ,$gastosPeninsula, $gastosBaleares, $gastosMinimos )
+    public function crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos )
     {
-        //echo "Bien";
-        // $createDB = Tienda::create([
-        //     "nombre" => $nombreTienda,
-        //     "gastos_peninsula" => $gastosPeninsula,
-        //     "gastos_baleares" => $gastosBaleares,
-        //     'gastos_minimos' => $gastosMinimos,
-        // ]);
-        return "true";
+        $nombreTienda = $this->nombreTienda;
+        $createDB = Tienda::create([
+            "nombre" => $nombreTienda,
+            "gastos_peninsula" => $gastosPeninsula,
+            "gastos_baleares" => $gastosBaleares,
+            'gastos_minimos' => $gastosMinimos,
+        ]);
     }
 
     // Crear pagina externa 
@@ -271,7 +269,8 @@ class DruniScrapingController extends Controller
         //Url de la tienda
         $url = $this->url;
         //Url de la tienda
-        $id_tienda = $this->id_tienda;
+        $id_tienda = $this->recogerIdTienda();
+
 
         $createDB = PaginaExterna::create([
             "url" => $url,
@@ -288,23 +287,21 @@ class DruniScrapingController extends Controller
     }
     
     // Crear producto 
-    public function crearProducto($img , $nombreProducto , $marca , $descripcion, $valoracion )
+    public function crearProducto($img , $nombreProducto , $marca , $descripcion, $id_subcategoria)
     {
-        // Recoger id subcategoria
-        $id_subcategoria = $this->recogerIdSubcategoria($subcategoria);
-        // Recoger id de la pagina
-        $id_pagina = $this->id_pagina;
+        echo "<br> ID SUBCATEGORIA: " . $id_subcategoria;
+        $id_tienda = $this->recogerIdTienda();
         $valoracion = 0;
-
-        $createDB = Producto::create([
+        Producto::create([
             "imagen" => $img,
             "nombre" => $nombreProducto,
             "marca" => $marca,
             'id_subcategoria' => $id_subcategoria,
             "descripcion" => $descripcion,
             'valoracion'=> $valoracion,
-            'id_pagina'=> $id_pagina
+            'id_tienda'=> $id_tienda
         ]);
+        echo "a salido";
         // if ($createDB)
         // {
         //     return redirect()->route('/')->with('success', 'Tienda created successfully.');
@@ -318,12 +315,10 @@ class DruniScrapingController extends Controller
     // Crear precios 
     public function crearPrecio($id_producto , $precio)
     {
-        // Recoger id de la pagina
-        $id_pagina = $this->id_pagina;
-
+        $id_tienda = $this->recogerIdTienda();
         $createDB = Precio::create([
             "id_producto" => $id_producto,
-            'id_pagina'=> $id_pagina,
+            'id_tienda'=> $id_tienda,
             "precio" => $precio,
         ]);
         // if ($createDB)
