@@ -5,17 +5,18 @@
     <div class="container__king container__king--details">
       
       <div class="container__details">
-        <img class="img__product--details" src="../img/producto.jpg" alt="">
+        <img class="img__product--details" src="" alt="">
+        @foreach ($productos as $producto)
         
         <div class="container__product--details">
-          <label class="title title--details">Nombre</label>
-          <label class="text--product">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Perspiciatis, quasi nulla? Ea optio perferendis vel dicta aut asperiores facere quae, consequatur officia repudiandae illo quasi illum praesentium ad suscipit nemo.</label>
+          <label class="title title--details">{{ $producto->nombre}}</label>
+          <label class="text--product">{{ $producto->descripcion}}</label>
           <div class="container__starsProduct container__starsProduct--details">
             <i class="bi bi-star-fill"></i>
             <i class="bi bi-star"></i>
             <i class="bi bi-star"></i>
             <i class="bi bi-star"></i>
-            <label >xx Valoraciones</label>
+            <label >{{ $producto->valoracion}} Valoraciones</label>
           </div>
           <a class="icono icono--navbar" type="button" href="#"><i class="bi bi-heart"></i></a>    
           
@@ -25,6 +26,7 @@
             <p class="text--product">Impuestos:</p>
             <p class="text--product">De la tienda:</p>
           </div>
+          @endforeach
 
         </div>
       </div>

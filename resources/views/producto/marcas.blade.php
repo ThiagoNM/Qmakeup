@@ -16,8 +16,8 @@
       <!-- CONTENEDOR PARA CENTRAR -->
     <div class="container__king container__king--brands" >
         <div class="container__alphabet">
-        @foreach ($productos as $producto)
-          <p style="color:white;">{{ $producto->marca}}</p>
+        @foreach ($marcas as $marca)
+          <p style="color:white;">{{ $marca->marca}}</p>
         @endforeach
   
       </div>
@@ -27,22 +27,24 @@
         @foreach ($productos as $producto)
 
         <div class="container__product">
-          <a class="nada" href="{{ route('producto') }}">
-          <img class="img__product" src="{{ asset('imagenes/producto.jpg') }}" alt="">
+          <a class="nada" href="{{ route('productoShow.show', $producto, $producto)}}">
+          <img class="img__product" src="{{ $producto->imagen }}" alt="">
           <label for="" class="title--product">{{ $producto->nombre}}</label>
           <p for="" class="text--product">{{ $producto->descripcion}}</p>
-          <p for="" class="text--product">{{ $producto->precio}}€</p>
           <div class="container__starsProduct">
             <i class="bi bi-star-fill"></i>
             <i class="bi bi-star"></i>
             <i class="bi bi-star"></i>
             <i class="bi bi-star"></i>
             <label for="">{{ $producto->valoracion}}</label>
-            </a>
           </div>
+          </a>
         </div>
+        
         @endforeach
       </div> 
-          {{ $productos->appends(request()->input())->links()}}
+      <div style="background-color:red;">
+        {{ $productos->appends(request()->input())->links()}}
+      </div>
     </div> 
 @endsection

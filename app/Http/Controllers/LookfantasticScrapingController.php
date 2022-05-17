@@ -11,6 +11,7 @@ use App\Models\CategoriaTienda;
 use App\Models\SubcategoriaTienda;
 use App\Models\PaginaExterna;
 use App\Models\Precio;
+use App\Models\Marca;
 
 
 class LookfantasticScrapingController extends Controller
@@ -26,6 +27,9 @@ class LookfantasticScrapingController extends Controller
 
     public function productsCategory(Client $client)
     {
+        // Eliminamos los precios anteriores para subir a la base de datos los precios actuales
+        $this->EliminarPrecios();
+
         $subcategorias = $this->recogerSubcategoriaTienda();
         foreach ($subcategorias as $subcategoria) {
 
@@ -38,7 +42,7 @@ class LookfantasticScrapingController extends Controller
             $lastPage = $this->extractlastPage($crawler);
             for ($i = 0; $i<=$lastPage[0]; $i++)
             {
-                $pageUrl = $urlSubcategoria . "?pageNumber={$i}";
+                $pageUrl = $pageUrl . "?pageNumber={$i}";
             
                 // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
                 $crawler = $client->request('GET', $pageUrl);
@@ -50,6 +54,7 @@ class LookfantasticScrapingController extends Controller
 
     public function extractProductsFrom(Crawler $crawler)
     {
+        set_time_limit(300);
         // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
         $inlineProductStyles = '"productBlock"';
 
@@ -63,22 +68,46 @@ class LookfantasticScrapingController extends Controller
             {
 
                 $nombreProducto = $productNode->filter("[class='productBlock_productName']")->first()->text();
-                $id_producto = $this->recogerIdProducto($nombreProducto);
-                if ($id_producto != null)
+                
+                // -------------------------------------------
+                $linkHome = "https://www.lookfantastic.es";
+                $linkNode = $productNode->filter("[class='productBlock_link']")->first()->attr('href');
+                $link = $linkHome . $linkNode;
+    
+                $client = new Client();
+                $crawler = $client->request('GET', $link);
+                $marcaNode = $crawler->filter("[class= 'athenaProductPage_productDetailsContainer' ]")->each(function($productNode) {
+    
+                    $longDiv = $productNode->filter("[class='productBrandLogo_image']")->count();
+                    if ($longDiv != 0)
+                    {
+                        $marcaN = $productNode->filter("[class='productBrandLogo_image']")->first()->attr('title');
+                        return $marcaN;
+                    }
+                    else{
+                        $marcaN = array("si");
+                        return $marcaN;
+                    }
+                });
+                if ($marcaNode != null)
                 {
-                    // Filtramos el contenedor para recoger una información especifica
-                    $precioNode = $productNode->filter("[class='productBlock_price']")->first()->text();
-                    
-                    $precioDirty = explode("€", $precioNode);
-                    $precioClean = trim($precioDirty[0]);
+                    $marcaProducto = $marcaNode[0];
 
-                    $precioFormat = str_replace(',','.',$precioClean);
-                    $precio = floatval($precioFormat);
+                    $id_producto = $this->recogerIdProducto($nombreProducto, $marcaProducto);
+                    if ($id_producto != null)
+                    {
+                        // Filtramos el contenedor para recoger una información especifica
+                        $precioNode = $productNode->filter("[class='productBlock_price']")->first()->text();
+                        
+                        $precioDirty = explode("€", $precioNode);
+                        $precioClean = trim($precioDirty[0]);
 
-                    dd("entra");
-                    $this->crearPrecios($id_producto, $precio);
+                        $precioFormat = str_replace(',','.',$precioClean);
+                        $precio = floatval($precioFormat);
+
+                        $this->crearPrecios($id_producto, $precio);
+                    } 
                 }
-
             }
 
         }); 
@@ -147,8 +176,8 @@ class LookfantasticScrapingController extends Controller
                 $gastosBaleares = $this->gastosBaleares;
                 $gastosMinimos = $this->gastosMinimos;
 
-                $this->crearTiendas($gastosPeninsula, $gastosBaleares, $gastosMinimos );
-                $this->crearPaginasExternas();
+                $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
+                $this->crearPaginaExterna();
                 $cont ++;
             }
         }); 
@@ -157,22 +186,35 @@ class LookfantasticScrapingController extends Controller
 
 
     // IdProducto
-    public function recogerIdProducto($nombreProducto)
+    public function recogerIdProducto($nombreProducto, $marcaProducto)
     {
-        $productos = Producto::all();
-        foreach ($productos as $producto)
+        $ExisteMarcas = Marca::all()->where("marca", $marcaProducto);
+        dd($ExisteMarcas);
+
+        if ($ExisteMarcas->exists())
         {
-            $NameProduct = $producto->nombre;
-            similar_text($nombreProducto, $NameProduct, $porciento);
-            echo "<br> PORCENTAJE: ". $porciento;
-            if ($porciento > 60)
+
+            foreach($ExisteMarcas as $ExisteMarca)
             {
-                dd("entra");
-                return $producto->id;
+                $id_existeMarca = $ExisteMarca->id;
+                dd($id_existeMarca);
             }
-            // else{
-            //     return redirect()->route('/')->with('error', 'Error searching product id');            
-            // }
+
+            $productos = Producto::all()->where("id_marca", $id_existeMarca);
+
+            foreach ($productos as $producto)
+            {
+                $NameProduct = $producto->nombre;
+                similar_text($nombreProducto, $NameProduct, $porciento);
+                echo "<br> PORCENTAJE: ". $porciento;
+                echo "<br> NOMBRE ENTRA: ". $nombreProducto;
+                echo "<br> NOMBRE BD: ". $NameProduct;
+
+                if ($porciento > 80)
+                {
+                    return $producto->id;
+                }
+            }
         }
     }
 
@@ -196,6 +238,7 @@ class LookfantasticScrapingController extends Controller
     // Crear tienda
     public function crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos )
     {
+        $this->EliminarTienda();
         $nombreTienda = $this->nombreTienda;
         $createDB = Tienda::create([
             "nombre" => $nombreTienda,
@@ -206,7 +249,7 @@ class LookfantasticScrapingController extends Controller
     }
 
     // Crear pagina externa 
-    public function crearPaginasExternas()
+    public function crearPaginaExterna()
     {
         try {
             //Url de la tienda
@@ -237,6 +280,99 @@ class LookfantasticScrapingController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+    // Eliminar precios  
+    public function EliminarPrecios ()
+    {
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $precios = Precio::all()->where("id_tienda", $id_tienda);
+            foreach($precios as $precio)
+            {
+                $precio->delete();
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 
+    // Eliminar pagina externa  
+    public function EliminarPaginaExterna ()
+    {
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $paginaExternas = PaginaExterna::all()->where("id_tienda", $id_tienda);
+            if($paginaExternas->count()>0)
+            {
+                foreach($paginaExternas as $paginaExterna)
+                {
+                    $paginaExterna->delete();
+                }
+            }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    // Eliminar tienda  
+    public function EliminarTienda ()
+    {
+        $this->EliminarPrecios();
+        $this->EliminarSubcategoriasTienda();
+        $this->EliminarCategoriasTienda();
+        $this->EliminarPaginaExterna();
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $tiendas = Tienda::all()->where("id", $id_tienda);
+            if($tiendas->count()>0)
+            {
+                foreach($tiendas as $tienda)
+                {
+                    $tienda->delete();
+                }
+            }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    // Eliminar Categorias  
+    public function EliminarCategoriasTienda()
+    {
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $categoriasTienda = CategoriaTienda::all()->where("id_tienda", $id_tienda);
+            if($categoriasTienda->count()>0)
+            {
+                foreach($categoriasTienda as $categoriaTienda)
+                {
+                    $categoriaTienda->delete();
+                }
+            }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    
+    // Eliminar Subcategorias  
+    public function EliminarSubcategoriasTienda()
+    {
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $subcategoriasTienda = SubcategoriaTienda::all()->where("id_tienda", $id_tienda);
+            if($subcategoriasTienda->count()>0)
+            {
+                foreach($subcategoriasTienda as $subcategoriaTienda)
+                {
+                    $subcategoriaTienda->delete();
+                }
+            }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 }

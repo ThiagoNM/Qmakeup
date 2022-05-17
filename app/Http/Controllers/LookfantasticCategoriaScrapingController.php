@@ -15,7 +15,7 @@ use App\Models\SubcategoriaTienda;
 
 class LookfantasticCategoriaScrapingController extends Controller
 {
-    private $nombre = "lookfantastic";
+    private $nombreTienda = "lookfantastic";
     private $EsCategoria = false;
     private $pageUrl = "https://www.lookfantastic.es";
     
@@ -59,8 +59,6 @@ class LookfantasticCategoriaScrapingController extends Controller
             // Comprovamos que es la categoria que nos interesa
             for ($i = 0; $i<$countListCat; $i++)
             {
-                echo "<br> Lista categoria: " . $ListCategory[$i] .  "<br> Nombre Categoria: " . $nombreCategoria ;
-
                 if ($nombreCategoria == $ListCategory[$i] AND !in_array($nombreCategoria, $ListaCategoriasYaRecogidas))
                 {
                     // Recogemos la ruta de la categoria
@@ -70,10 +68,8 @@ class LookfantasticCategoriaScrapingController extends Controller
                     $pageUrl = $this->pageUrl;
                     $client = new Client();
                     
-                    echo "<br>" . "Categoria: " . $nombreCategoria . "<br>";
                     // Creamos una categoria en la base de datos en la tabla CATEGORIA_PÁGINA
                     $this->crearCategoriaTienda($nombreCategoria, $ruta_categoria);
-                    echo "<br> CATEGORIA CREADA <br>";
                     array_push($ListaCategoriasYaRecogidas, $nombreCategoria);
 
                     $inlineProductStyles = '"subnav-level-three"';
@@ -96,7 +92,6 @@ class LookfantasticCategoriaScrapingController extends Controller
                             similar_text($ListSubcategory[$x], $nombreSubcategoria, $porciento);
                             if ($porciento > 70)
                             {
-                                echo "<br>" . " SUBCATEGORIA CREADA: " . $nombreSubcategoria. "<br>";
                                 $this->crearSubcategoriaTienda($nombreSubcategoria, $ruta_subcategoria);
                                 break;
                             }
@@ -164,8 +159,8 @@ class LookfantasticCategoriaScrapingController extends Controller
     // Id de la tienda en la que estamos
     public function recogerIdTienda()
     {
-        $nombre = $this->nombre;
-        $tienda = Tienda::all()->where('nombre', '=',$nombre)->first();
+        $nombreTienda = $this->nombreTienda;
+        $tienda = Tienda::all()->where('nombre', $nombreTienda)->first();
         $id_tienda = $tienda->id;
         return $id_tienda ;
     }
@@ -173,7 +168,7 @@ class LookfantasticCategoriaScrapingController extends Controller
     // Id Categoria
     public function recogerIdCategoria($nombreCategoria)
     {
-        $categorias = Categoria::all()->where('nombre', '=',$nombreCategoria)->first();
+        $categorias = Categoria::all()->where('nombre',$nombreCategoria)->first();
         $id_categoria = $categorias->id;
         return $id_categoria ;
     }
@@ -183,14 +178,19 @@ class LookfantasticCategoriaScrapingController extends Controller
     public function crearCategoriaTienda($nombreCategoria, $ruta_categoria)
     {
         try{
-            $id_tienda = $this->recogerIdTienda();
-            $id_categoria = $this->recogerIdCategoria($nombreCategoria);
-            CategoriaTienda::create([
-                'nombre' => $nombreCategoria,
-                'id_categoria' => $id_categoria,
-                'url_categoria' => $ruta_categoria,
-                'id_tienda' => $id_tienda
-            ]);
+            $ExisteCategoria = CategoriaTienda::where("nombre", $nombreCategoria)->exists();
+            if(!$ExisteCategoria)
+            {
+                $id_tienda = $this->recogerIdTienda();
+                $id_categoria = $this->recogerIdCategoria($nombreCategoria);
+                CategoriaTienda::create([
+                    'nombre' => $nombreCategoria,
+                    'id_categoria' => $id_categoria,
+                    'url_categoria' => $ruta_categoria,
+                    'id_tienda' => $id_tienda
+                ]);
+            }
+
         } catch (\Throwable $th) {
             echo "Error: " . $th;
         }
@@ -207,11 +207,9 @@ class LookfantasticCategoriaScrapingController extends Controller
             $NombreSubC = $subcategoria->nombre;
             $NombreSubC = $this->limpiarAcentos($NombreSubC);
             $NombreSubC = strtolower($NombreSubC);
-            echo "<br> NOMBRE SUBCATEGORIA DENTRO: " . $NombreSubC;
             similar_text($NombreSubC, $nombreSubcategoria, $porciento);
             if ($porciento > 70)
             {
-                echo "ENTRA!!!!";
                 $id_subcategoria = $subcategoria->id;
                 
                 return $id_subcategoria ;
@@ -224,8 +222,6 @@ class LookfantasticCategoriaScrapingController extends Controller
         try {
             $id_subcategoria = $this->recogerIdSubcategoria($nombreSubcategoria);
             $id_tienda = $this->recogerIdTienda();
-            echo "<br> ID SUBCATEGORIA" . $id_subcategoria;
-            echo "<br> ID TIENDA" . $id_tienda;
 
             SubcategoriaTienda::create([
                 'nombre' => $nombreSubcategoria,
@@ -233,6 +229,7 @@ class LookfantasticCategoriaScrapingController extends Controller
                 'url_subcategoria' => $ruta_subcategoria,
                 'id_tienda' => $id_tienda
             ]);
+
         } catch (\Throwable $th) {
             echo "Error: " . $th;
         }

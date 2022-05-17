@@ -4,44 +4,26 @@
 
     <!-- BARRA DE CATEGORIAS -->
     <div class="navbar__categories">
-      
-      <div class="dropdown">
-        <button type="button" class="dropdown-toggle boton--nav" data-bs-toggle="dropdown">
-          Ojos
-        </button>
-        <ul class="dropdown-menu">
-          <li><button class="dropdown-item" href="/mascaras" >Máscara de pestañas</button></li>
-          <li><a class="dropdown-item" href="#">Delineadores de ojos</a></li>
-          <li><a class="dropdown-item" href="#">Sombras de ojos</a></li>
-          <li><a class="dropdown-item" href="#">Cejas</a></li>
-        </ul>
-      </div>
 
-      <div class="dropdown">
-        <button type="button" class="dropdown-toggle boton--nav" data-bs-toggle="dropdown">
-          Rostro
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">Bases de maquillaje</a></li>
-          <li><a class="dropdown-item" href="#">Prebases de maquillaje</a></li>
-          <li><a class="dropdown-item" href="#">Polvos de maquillaje</a></li>
-          <li><a class="dropdown-item" href="#">Coloretes</a></li>
-          <li><a class="dropdown-item" href="#">Correctores de maquillaje</a></li>
-        </ul>
-      </div>
+      @foreach($categorias as $categoria)
+        
+        <div class="dropdown">
+          <button type="button" class="dropdown-toggle boton--nav" data-bs-toggle="dropdown">
+            {{ucfirst($categoria->nombre)}}
+          </button>
+          <ul class="dropdown-menu">
+            @php 
+              $subcategorias = $categorias->where('id_categoria', $categoria->id)
+            @endphp
+            
+            @foreach($subcategorias as $subcategoria)
+              <li><button class="dropdown-item" onClick="{{$productos = $productos->where('id_subcategoria', $subcategoria->id)}}" >{{$subcategoria->nombre}}</button></li>
+            @endforeach
 
-      <div class="dropdown">
-        <button type="button" class="dropdown-toggle boton--nav" data-bs-toggle="dropdown">
-          Labios
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href='#'>Pintalabios</a></li>
-          <li><a class="dropdown-item" href="#">Gloss de labios</a></li>
-          <li><a class="dropdown-item" href="#">Perfiladores de labios</a></li>
-          <li><a class="dropdown-item" href="#">Voluminizadores</a></li>
-          <li><a class="dropdown-item" href="#">Prebases</a></li>
-        </ul>
-      </div>
+          </ul>
+        </div>
+
+      @endforeach
 
     </div>
 
@@ -65,7 +47,8 @@
         @foreach ($productos as $producto)
 
         <div class="container__product">
-          <img class="img__product" src="{{ asset('imagenes/producto.jpg') }}" alt="">
+          <a class="nada" href="{{ route('productoShow.show', $producto, $producto)}}">
+          <img class="img__product" src="{{ $producto->imagen }}" alt="">
           <label for="" class="title--product">{{ $producto->nombre}}</label>
           <p for="" class="text--product">{{ $producto->descripcion}}</p>
           <div class="container__starsProduct">
@@ -75,6 +58,7 @@
             <i class="bi bi-star"></i>
             <label for="">{{ $producto->valoracion}}</label>
           </div>
+          </a>
         </div>
 
         @endforeach

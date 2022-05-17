@@ -6,6 +6,13 @@ use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use App\Models\Precio;
+use App\Models\Marca;
+use App\Models\Tienda;
+use App\Models\PaginaExterna;
+use App\Models\Categoria;
+use App\Models\Subcategoria;
+
 
 
 class ProductoController extends Controller
@@ -35,24 +42,6 @@ class ProductoController extends Controller
      */
     public function marcas(Request $request)
     {
-        //if($request) {
-        //    $query = trim($request->get('search'));
-//
-        //    $produc = Producto::Where('nombre','LIKE', '%'.$query.'%')
-        //        ->orderBy('id','asc')
-        //        ->paginate(9);
-//
-        //    return view("producto.marcas", [
-        //        "productos" => $produc,$query
-        //    ]);
-        //}else{
-        //    $all = Producto::all()->paginate(9);
-//
-        //    return view("productos.marcas", [
-        //        "productos" => $all
-        //    ]);
-        //}
-
         $busqueda = "";
         if ($request->get("search")) {
             $busqueda = $request->get("search");
@@ -67,9 +56,12 @@ class ProductoController extends Controller
             ->orWhere("precio", "LIKE", "$busqueda%");
         }
         # Al final de todo, invocamos a paginate que tendrá todos los filtros
+        $marcas = Marca::all();
         $productos = $builder->paginate(9);
         return view("producto.marcas", [
+            "marcas" => $marcas,
             "productos" => $productos,
+
     ]);
 
 
@@ -84,7 +76,9 @@ class ProductoController extends Controller
     public function categorias(Request $request)
     {
         return view("producto.categorias", [
-            "productos" => Producto::all()
+            "productos" => Producto::all(),
+            "categorias" => Categoria::all(),
+            "subcategorias" => Subcategoria::all()
         ]);
     }
 
@@ -117,14 +111,37 @@ class ProductoController extends Controller
 
     /**
      * Display the specified resource.
-     *
+     *      
      * @param  \App\Models\Producto  $producto
      * @return \Illuminate\Http\Response
      */
-    public function show(Producto $producto)
+    public function show(Producto $producto, $id)
     {
-        return view("productos.show", [
-            'productos' =>$producto
+        $precios = Precio::orderBy("precio", 'desc')->get();
+        $precios = $precios->where("id_producto", $id);
+
+        $listaPrecios = array();
+        $listaId = [];
+        foreach ($precios as $precio)
+        {
+            $listaPrecios[$precio->id] =$precio->precio;
+        }
+        $precioBarato = min( $listaPrecios);
+
+        // Informacion del producto más barato
+        $id_tiendaBarata = Precio::all()->where('precio',$precioBarato)->first()->id_tienda;
+        $tienda = Tienda::all()->where('id', $id_tiendaBarata)->first();
+        $producto = Producto::all()->where("id",$id )->first();
+        // TODOS 
+        $tiendas = Tienda::all();
+        $pagina_externa = PaginaExterna::all();
+        return view("producto.show", [
+            'producto' =>$producto,
+            'precio' =>$precio,
+            'precios'=>$precios,
+            'tienda' =>$tienda,
+            'tiendas' =>$tiendas,
+            'pagina_e' =>$pagina_externa
         ]);
     }
 
