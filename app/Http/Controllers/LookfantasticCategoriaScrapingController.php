@@ -18,18 +18,45 @@ class LookfantasticCategoriaScrapingController extends Controller
     private $nombreTienda = "lookfantastic";
     private $EsCategoria = false;
     private $pageUrl = "https://www.lookfantastic.es";
-    
+    private $errors = [];
     private $ListaCategoriasYaRecogidas = [];
 
 
     // Para hacer una solicitud a la página
     public function category(Client $client)
     {
+
+        try {
+            $this->eliminarCategoriasTienda();
+            $this->eliminarSubcategoriasTienda();
+        } catch (Exception $e) {
+            $errors = $this->errors;
+            $msg = $e->getMessage();
+            array_push($errors, $msg);
+            $this->errors = $errors;
+        }
+
+
         $pageUrl = $this->pageUrl;
 
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
         $crawler = $client->request('GET', $pageUrl);
-        $this->extractCategoryFrom($crawler);
+        try{
+            $this->extractCategoryFrom($crawler);
+        } catch (Exception $e) {
+            $errors = $this->errors;
+            $msg = $e->getMessage();
+            array_push($errors, $msg);
+            $this->errors = $errors;
+        }
+        $errors = $this->erros;
+        if ($errors != null)
+        {
+            return view('perfil')->with('success', 'Las categorias y subcategorias de la tienda Lookfantastic han sido creadas correctamente.');
+        }
+        else{
+            return view('perfil')->with('error', 'Las categorias y subcategorias de la tienda Lookfantastic no se han podido crear correctamente.');
+        }
     }
 
     // Recoger las categorias de la pagina
@@ -69,9 +96,16 @@ class LookfantasticCategoriaScrapingController extends Controller
                     $client = new Client();
                     
                     // Creamos una categoria en la base de datos en la tabla CATEGORIA_PÁGINA
-                    $this->crearCategoriaTienda($nombreCategoria, $ruta_categoria);
-                    array_push($ListaCategoriasYaRecogidas, $nombreCategoria);
+                    try{
+                        $this->crearCategoriaTienda($nombreCategoria, $ruta_categoria);
+                    } catch (Exception $e) {
+                        $errors = $this->errors;
+                        $msg = $e->getMessage();
+                        array_push($errors, $msg);
+                        $this->errors = $errors;
+                    }
 
+                    array_push($ListaCategoriasYaRecogidas, $nombreCategoria);
                     $inlineProductStyles = '"subnav-level-three"';
 
                     // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
@@ -173,26 +207,48 @@ class LookfantasticCategoriaScrapingController extends Controller
         return $id_categoria ;
     }
 
+    // Eliminar Categorias  
+    public function eliminarCategoriasTienda()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $categoriasTienda = CategoriaTienda::all()->where("id_tienda", $id_tienda);
+        if($categoriasTienda->count()>0)
+        {
+            foreach($categoriasTienda as $categoriaTienda)
+            {
+                $categoriaTienda->delete();
+            }
+        }
 
+    }
+
+    // Eliminar Subcategorias  
+    public function eliminarSubcategoriasTienda()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $subcategoriasTienda = SubcategoriaTienda::all()->where("id_tienda", $id_tienda);
+        if($subcategoriasTienda->count()>0)
+        {
+            foreach($subcategoriasTienda as $subcategoriaTienda)
+            {
+                $subcategoriaTienda->delete();
+            }
+        }
+    }
 
     public function crearCategoriaTienda($nombreCategoria, $ruta_categoria)
     {
-        try{
-            $ExisteCategoria = CategoriaTienda::where("nombre", $nombreCategoria)->exists();
-            if(!$ExisteCategoria)
-            {
-                $id_tienda = $this->recogerIdTienda();
-                $id_categoria = $this->recogerIdCategoria($nombreCategoria);
-                CategoriaTienda::create([
-                    'nombre' => $nombreCategoria,
-                    'id_categoria' => $id_categoria,
-                    'url_categoria' => $ruta_categoria,
-                    'id_tienda' => $id_tienda
-                ]);
-            }
-
-        } catch (\Throwable $th) {
-            echo "Error: " . $th;
+        $id_tienda = $this->recogerIdTienda();
+        $ExisteCategoria = CategoriaTienda::where("nombre", $nombreCategoria)->where("id_tienda", $id_tienda)->exists();
+        if(!$ExisteCategoria)
+        {
+            $id_categoria = $this->recogerIdCategoria($nombreCategoria);
+            CategoriaTienda::create([
+                'nombre' => $nombreCategoria,
+                'id_categoria' => $id_categoria,
+                'url_categoria' => $ruta_categoria,
+                'id_tienda' => $id_tienda
+            ]);
         }
     }
     
@@ -219,21 +275,15 @@ class LookfantasticCategoriaScrapingController extends Controller
     
     public function crearSubcategoriaTienda($nombreSubcategoria, $ruta_subcategoria)
     {
-        try {
-            $id_subcategoria = $this->recogerIdSubcategoria($nombreSubcategoria);
-            $id_tienda = $this->recogerIdTienda();
+        $id_subcategoria = $this->recogerIdSubcategoria($nombreSubcategoria);
+        $id_tienda = $this->recogerIdTienda();
 
-            SubcategoriaTienda::create([
-                'nombre' => $nombreSubcategoria,
-                'id_subcategoria' => $id_subcategoria,
-                'url_subcategoria' => $ruta_subcategoria,
-                'id_tienda' => $id_tienda
-            ]);
-
-        } catch (\Throwable $th) {
-            echo "Error: " . $th;
-        }
-
+        SubcategoriaTienda::create([
+            'nombre' => $nombreSubcategoria,
+            'id_subcategoria' => $id_subcategoria,
+            'url_subcategoria' => $ruta_subcategoria,
+            'id_tienda' => $id_tienda
+        ]);
     }
 
 }

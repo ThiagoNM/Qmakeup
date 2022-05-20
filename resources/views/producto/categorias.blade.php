@@ -6,7 +6,7 @@
     <div class="navbar__categories">
 
       @foreach($categorias as $categoria)
-        
+
         <div class="dropdown">
           <button type="button" class="dropdown-toggle boton--nav" data-bs-toggle="dropdown">
             {{ucfirst($categoria->nombre)}}
@@ -24,8 +24,6 @@
       @endforeach
 
     </div>
-
-
 
 
     <!-- HERRAMIENTA DE BUSQUEDA -->

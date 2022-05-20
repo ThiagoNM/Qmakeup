@@ -20,6 +20,7 @@ class Precios extends Migration
             $table->foreignId('id_tienda')
                     ->references('id')->on('tiendas');
             $table->decimal('precio',8,2);
+            $table->string('url_producto');
             $table->timestamps();
         });
     }

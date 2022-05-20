@@ -12,6 +12,7 @@ class Precio extends Model
     protected $fillable = [
         "id_producto",
         'id_tienda',
-        "precio"
+        "precio",
+        "url_producto"
     ];
 }

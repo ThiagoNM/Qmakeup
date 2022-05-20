@@ -50,7 +50,6 @@
 </div>
       <!-- CONTENEDOR PARA CENTRAR -->
     <div class="container__king container__king--details">
-      
       <div class="container__details">
         <img class="img__product--details" src="{{$producto->imagen}}" alt="">
         <div class="container__product--details">
@@ -75,7 +74,15 @@
           
         
           @if(Auth::user())
-            <a class="icono icono--navbar" type="button" href="{{ route('lista', $producto->id) }}"><i class="bi bi-heart"></i></a>
+          
+            @php($estado = $listaDeseo->where('id_producto', $producto->id)->where('id_usuario', Auth::user()->id)->count())
+
+            @if ($estado==0)
+              <a class="icono icono--navbar" href="{{ route('lista', $producto->id) }} type="button"><i class="bi bi-heart"></i></a>
+            @else
+              <a class="icono icono--navbar" href="{{ route('lista', $producto->id) }} type="button"><i class="bi bi-heart-fill"></i></a>
+            @endif
+            
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
               Valorar
             </button>    
@@ -107,11 +114,11 @@
             <tr>
               <td>{{$p->precio + $t->gastos_baleares}}</td>
               <td>{{$p->precio + $t->gastos_peninsula}}</td>
-              <td>{{$p->precio}}</td>
+              <td><a href="{{$p->url_producto}}" target="_blank">{{$p->precio}}</a></td>
               <td>{{$t->gastos_baleares}}</td>
               <td>{{$t->gastos_peninsula}}</td>
               <td>{{$t->gastos_minimos}}</td>
-              <td><a href="{{$pagina_e->where('id_tienda', $t->id)->first()->url}}">{{ucfirst($t->nombre)}}</a></td>
+              <td><a href="{{$pagina_e->where('id_tienda', $t->id)->first()->url}}" target="_blank">{{ucfirst($tiendas->where("id", $p->id_tienda)->first()->nombre)}}</a></td>
             </tr>
           @endforeach
         </table>

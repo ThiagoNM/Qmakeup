@@ -14,7 +14,7 @@ use App\Models\Categoria;
 use App\Models\Subcategoria;
 use App\Models\SubcategoriaTienda;
 use App\Models\Rating;
-
+use App\Models\Lista_de_deseo;
 
 
 
@@ -113,8 +113,10 @@ class ProductoController extends Controller
      */
     public function top(Request $request)
     {
+        $productos = Producto::orderBy("valoracion", 'asc')->get();
+
         return view("home", [
-            "productos" => Producto::all()
+            "productos" => $productos
         ]);
     }
 
@@ -140,9 +142,8 @@ class ProductoController extends Controller
      */
     public function show(Producto $producto, $id)
     {
-        $precios = Precio::orderBy("precio", 'desc')->get();
+        $precios = Precio::orderBy("precio", 'asc')->get();
         $precios = $precios->where("id_producto", $id);
-
         $listaPrecios = array();
         $listaId = [];
         foreach ($precios as $precio)
@@ -152,9 +153,11 @@ class ProductoController extends Controller
         $precioBarato = min( $listaPrecios);
 
         // Informacion del producto más barato
-        $id_tiendaBarata = Precio::all()->where('precio',$precioBarato)->first()->id_tienda;
+        $precio = Precio::all()->where('precio',$precioBarato)->first();
+        $id_tiendaBarata = $precio->id_tienda;
         $tienda = Tienda::all()->where('id', $id_tiendaBarata)->first();
         $producto = Producto::all()->where("id",$id )->first();
+
         // TODOS 
         $tiendas = Tienda::all();
         $pagina_externa = PaginaExterna::all();
@@ -174,6 +177,7 @@ class ProductoController extends Controller
         } else {
             $rating_value = 0;
         }
+        $listaDeseo = Lista_de_deseo::all();
         
         return view("producto.show", [
             'producto' =>$producto,
@@ -182,7 +186,7 @@ class ProductoController extends Controller
             'tienda' =>$tienda,
             'tiendas' =>$tiendas,
             'pagina_e' =>$pagina_externa,
-            
+            'listaDeseo' => $listaDeseo
         ], compact('ratings','rating_value','user_rating'));
     }
 

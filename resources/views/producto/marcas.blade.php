@@ -1,6 +1,7 @@
 @extends('layouts.principal')
 
 @section('content')
+  <div class="container__global--brands">
 
     <!-- HERRAMIENTA DE BUSQUEDA -->
     <form>
@@ -18,7 +19,7 @@
         <div class="container__alphabet">
         <form action="{{route('marcas')}}">
           @foreach ($marcas as $marca)
-            <a style="color:white;" id="filtro" href="{{ route('find', $marca->id)}}">{{ $marca->marca}}</a>
+            <a class="alphabet__brand" id="filtro" href="{{ route('find', $marca->id)}}">{{ $marca->marca}}</a>
           @endforeach
         </form>
       </div>

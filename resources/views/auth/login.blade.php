@@ -16,5 +16,4 @@
     <p class="text--form"><a class="text--link" href="{{ route('password.request') }}">He olvidado la contraseña?</a></p>
     <button type="submit" class="boton--form">{{ __('Log in') }}</button>
   </form>
-
-
+@endsection

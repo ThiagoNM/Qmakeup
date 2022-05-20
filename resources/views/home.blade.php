@@ -7,7 +7,7 @@
     <div class="centered">
         <label class="title">HOLA, BIENVENIDO!</label>
         <label class="text">Busca tu producto de maquillaje clicando</label>
-        <button class="boton--welcome">AQUÍ</button>
+        <button class="boton boton--welcome">AQUÍ</button>
     </div>
 </div>
 <br>
@@ -63,7 +63,6 @@
   </div>
   <div class="continer__business">
     <img src="{{ asset('imagenes/logo-DRUNI.png') }}" alt="">
-    <img src="{{ asset('imagenes/logo-primor.jpg') }}" alt="">
     <img src="{{ asset('imagenes/logo-lookfantastic.png') }}" alt="">
   </div>
 </div>

@@ -1,7 +1,7 @@
 @extends('layouts.loginandregister')
 
 @section('content')
-  <form class="container__form" method="POST" action="{{ route('register') }}">
+  <form class="container__form" method="POST" action="{{ route('register') }}" >
       @csrf
     <p class="title--form">Registarte</p>
     <div class="form-group">
@@ -23,3 +23,5 @@
     <p class="text--form">Ya estas registrado? <a class="text--link" href="{{ route('login') }}">Iniciar sesión</a></p>
     <button type="submit" class="boton--form">{{ __('Register') }}</button>
   </form>
+  <script src="{{asset('js/validation/registerValidation.js')}}"></script>
+
