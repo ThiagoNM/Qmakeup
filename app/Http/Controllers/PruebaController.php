@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Redirect;
 
 class PruebaController extends Controller
 {
+
+    public function hola()
+    {
+        dd("hola");
+    }
     
     private $nombreTienda = "druni";
     private $url = "https://www.druni.es/";

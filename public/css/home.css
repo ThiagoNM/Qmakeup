@@ -178,6 +178,9 @@ body{
     margin-left: 1%;
 }
 
+.link__product{
+    text-decoration:none;
+}
 
 /* Contendor con las tiendas con las que trabajamos */
 .continer__business{
@@ -247,11 +250,8 @@ body{
     margin-left: 45%;
 }
 
-.container__alphabet--card{
-    width: 95%;
-    background-color: #272727;
-    border: 0px solid black;
-    margin-left: 10%;
+.alphabet__brand{
+    color:white;
 }
 
 .container__form{

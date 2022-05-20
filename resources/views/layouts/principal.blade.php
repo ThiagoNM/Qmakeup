@@ -45,7 +45,7 @@
                                 onclick="event.preventDefault();
                                             this.closest('form').submit();">
                             <i class="bi bi-door-open"></i>
-                        <a>
+                        </a>
                     </form>
                 @else
                   <a class="nav-link boton__nav boton__nav--secondary" href="{{ route('login') }}">Iniciar sesión</a>
@@ -56,8 +56,6 @@
             </div>
           </nav>
   </header>
-
-  <!-- BIENVENIDA -->
   <div class="principal">
     @yield('content')
   </div>

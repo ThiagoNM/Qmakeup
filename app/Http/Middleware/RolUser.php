@@ -12,12 +12,12 @@ class RolUser
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @param  int  $ir_rol
+     * @param  int  $id_rol
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next, $ir_rol)
+    public function handle(Request $request, Closure $next, $id_rol)
     {
-        if ($request->user()->ir_rol != $ir_rol) {
+        if ($request->user()->id_rol != $id_rol) {
             $url = $request->url();
             return redirect('/')
                 ->with('error', "Access denied to {$url}");

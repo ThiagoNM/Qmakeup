@@ -30,16 +30,8 @@ class LookfantasticScrapingController extends Controller
     public function productsCategory(Client $client)
     {
         set_time_limit(7200);
-        try {
             // Eliminamos los precios anteriores para subir a la base de datos los precios actuales
             $this->EliminarPrecios();
-        } catch (Exception $e) {
-            $errors = $this->errors;
-            $msg = $e->getMessage();
-            array_push($errors, $msg);
-            $this->errors = $errors;
-        }
-
 
         $subcategorias = $this->recogerSubcategoriaTienda();
         foreach ($subcategorias as $subcategoria) {
@@ -133,16 +125,9 @@ class LookfantasticScrapingController extends Controller
                             $precioFormat = str_replace(',','.',$precioClean);
                             $precio = floatval($precioFormat);
 
-                            try {
-                                $this->crearPrecios($id_producto, $precio);
-                                echo "<br>Precio creado";
-                            } catch (Exception $e) {
-                                $errors = $this->errors;
-                                $msg = $e->getMessage();
-                                array_push($errors, $msg);
-                                $this->errors = $errors;
-                            }
-                    
+                            echo "<br> VAMOS A ENTRAR";
+                            $this->crearPrecios($id_producto, $precio);
+                            echo "<br>Precio creado";
                         } 
                     }
                 }
@@ -322,6 +307,12 @@ class LookfantasticScrapingController extends Controller
     {
         $id_tienda = $this->recogerIdTienda();
         $url_producto = $this->url_producto;
+        
+        echo "<br> ESTAMOS EN LA FUNCION CREAR PRECIOS";       
+        echo "<br> ID PRODUCTO: " . $id_producto;
+        echo "<br> ID TIENDA: " . $id_tienda;
+        echo "<br> URL PRODUCTO: " . $url_producto;
+
         $createDB = Precio::create([
             "id_producto" => $id_producto,
             'id_tienda'=> $id_tienda,

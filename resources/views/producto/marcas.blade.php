@@ -1,7 +1,6 @@
 @extends('layouts.principal')
 
 @section('content')
-
   <div class="container__global--brands">
 
     <!-- HERRAMIENTA DE BUSQUEDA -->
@@ -16,7 +15,7 @@
       <div class="container__alphabet">
 
         @foreach ($marcas as $marca)
-          <p style="color:white;">{{ $marca->marca}}</p>
+          <p class="alphabet__brand">{{ $marca->marca}}</p>
         @endforeach
 
       </div>
@@ -27,7 +26,7 @@
         @foreach ($productos as $producto)
 
         <div class="container__product">
-          <a class="nada" href="{{ route('productoShow.show', $producto, $producto)}}">
+          <a class="link__product" href="{{ route('productoShow.show', $producto, $producto)}}">
           <img class="img__product" src="{{ $producto->imagen }}" alt="">
           <label for="" class="title--product">{{ $producto->nombre}}</label>
           <p for="" class="text--product">{{ $producto->descripcion}}</p>

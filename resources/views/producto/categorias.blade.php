@@ -42,7 +42,7 @@
         @foreach ($productos as $producto)
 
         <div class="container__product">
-          <a class="nada" href="{{ route('productoShow.show', $producto, $producto)}}">
+          <a class="link__product" href="{{ route('productoShow.show', $producto, $producto)}}">
           <img class="img__product" src="{{ $producto->imagen }}" alt="">
           <label for="" class="title--product">{{ $producto->nombre}}</label>
           <p for="" class="text--product">{{ $producto->descripcion}}</p>

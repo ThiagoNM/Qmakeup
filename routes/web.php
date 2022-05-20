@@ -93,19 +93,19 @@ Route::get('/dashboard', function () {
 require __DIR__.'/auth.php';
 
 // Crear Tiendas
-Route::get('/scraping/druni/gastos', [App\Http\Controllers\DruniScrapingController::class, 'shippingCostData'])->name('tiendaDruni')->middleware(['auth', 'role:2']);
-Route::get('/scraping/look/gastos', [App\Http\Controllers\LookfantasticScrapingController::class, 'shippingCostData'])->name('tiendaLook');
+Route::get('/scraping/druni/gastos', [App\Http\Controllers\DruniScrapingController::class, 'shippingCostData'])->name('tiendaDruni')->middleware(['auth', 'id_rol:2']);
+Route::get('/scraping/look/gastos', [App\Http\Controllers\LookfantasticScrapingController::class, 'shippingCostData'])->name('tiendaLook')->middleware(['auth', 'id_rol:2']);
 // Route::get('/scraping/maquillalia/gastos', [App\Http\Controllers\MaquillaliaScrapingController::class, 'shippingCostData']);
 
 // Categorias de cada página
-Route::get('/scraping/druni/categorias', [App\Http\Controllers\DruniCategoriaScrapingController::class, 'category'])->name('categoriasDruni');
-Route::get('/scraping/look/categorias', [App\Http\Controllers\LookfantasticCategoriaScrapingController::class, 'category'])->name('categoriasLook');
+Route::get('/scraping/druni/categorias', [App\Http\Controllers\DruniCategoriaScrapingController::class, 'category'])->name('categoriasDruni')->middleware(['auth', 'id_rol:2']);
+Route::get('/scraping/look/categorias', [App\Http\Controllers\LookfantasticCategoriaScrapingController::class, 'category'])->name('categoriasLook')->middleware(['auth', 'id_rol:2']);
 // Route::get('/scraping/maquillalia/categorias', [App\Http\Controllers\MaquillaliaCategoriaScrapingController::class, 'category']);
 
 // Web Scraping producto y precios
-Route::get('/scraping/druni/productos', [App\Http\Controllers\DruniScrapingController::class, 'pageDate'])->name('productosDruni');
+Route::get('/scraping/druni/productos', [App\Http\Controllers\DruniScrapingController::class, 'pageDate'])->name('productosDruni')->middleware(['auth', 'id_rol:2']);
 // Web Scraping precios
-Route::get('/scraping/look/productos', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory'])->name('preciosLook');
+Route::get('/scraping/look/productos', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory'])->name('preciosLook')->middleware(['auth', 'id_rol:2']);
 // Route::get('/scraping/maquillalia/productos', [App\Http\Controllers\MaquillaliaScrapingController::class, 'productsCategory']);
 
 
@@ -117,6 +117,6 @@ Route::get('/update', [App\Http\Controllers\UpdateUsersController::class, 'updat
 Route::get('/cambiar', [App\Http\Controllers\CambiarController::class, 'edit'])->name('ea');
 Route::put('/cambiar', [App\Http\Controllers\CambiarController::class, 'update'])->name('password_update');
 
-Route::get('/prueba', [App\Http\Controllers\PruebaController::class, 'shippingCostData']);
+Route::get('/prueba', [App\Http\Controllers\PruebaController::class, 'hola'])->middleware(['auth', 'id_rol:2']);
 Route::resource('/productoShow', App\Http\Controllers\ProductoController::class);
 Route::get('/borrar', [App\Http\Controllers\DruniScrapingController::class, 'EliminarPrecios']);

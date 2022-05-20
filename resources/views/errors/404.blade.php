@@ -1,10 +1,10 @@
-<!-- @extends('errors::minimal')
+<body style="font-family: Arial, Helvetica, sans-serif;">
 
-@section('title', __('Forbidden'))
-@section('code', '404')
-@section('message', __($exception->getMessage() ?: 'Forbidden')) -->
+<div style="text-align:center;margin-top:5%;">
+    <h1 style="color:#6d9eeb;text-shadow:4px 4px 2px#e5bacd;">Error 404 | FORBIDDEN </h1>
+    <img src="{{asset('videos/error404.gif')}}" style="background-repeat:no-repeat;"/>
+</div>
 
-<body>
-    @section('message', __($exception->getMessage() ?: 'Forbidden'))
-    <h1>ERROR 404 </h1>
+
 </body>
+
