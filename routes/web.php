@@ -31,6 +31,8 @@ Route::get('/product', function () {
     return view('product');
 })->name('producto');
 
+
+
 Route::get('/cambiar', function () {
     return view('si');
 });
@@ -90,28 +92,31 @@ Route::get('/dashboard', function () {
 
 require __DIR__.'/auth.php';
 
-// Web Scraping
-Route::get('/druni', [App\Http\Controllers\DruniScrapingController::class, 'shippingCostData']);
-Route::get('/look', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory']);
-Route::get('/maquillalia', [App\Http\Controllers\MaquillaliaScrapingController::class, 'productsCategory']);
+// Crear Tiendas
+Route::get('/scraping/druni/gastos', [App\Http\Controllers\DruniScrapingController::class, 'shippingCostData'])->name('tiendaDruni')->middleware(['auth', 'role:2']);
+Route::get('/scraping/look/gastos', [App\Http\Controllers\LookfantasticScrapingController::class, 'shippingCostData'])->name('tiendaLook');
+// Route::get('/scraping/maquillalia/gastos', [App\Http\Controllers\MaquillaliaScrapingController::class, 'shippingCostData']);
 
 // Categorias de cada página
-Route::get('/cd', [App\Http\Controllers\DruniCategoriaScrapingController::class, 'category']);
-Route::get('/cm', [App\Http\Controllers\MaquillaliaCategoriaScrapingController::class, 'category']);
-Route::get('/cl', [App\Http\Controllers\LookfantasticCategoriaScrapingController::class, 'category']);
+Route::get('/scraping/druni/categorias', [App\Http\Controllers\DruniCategoriaScrapingController::class, 'category'])->name('categoriasDruni');
+Route::get('/scraping/look/categorias', [App\Http\Controllers\LookfantasticCategoriaScrapingController::class, 'category'])->name('categoriasLook');
+// Route::get('/scraping/maquillalia/categorias', [App\Http\Controllers\MaquillaliaCategoriaScrapingController::class, 'category']);
 
-// Gastos de envio de cada página
-Route::get('/gastosd', [App\Http\Controllers\DruniScrapingController::class, 'shippingCostData']);
-Route::get('/gastosl', [App\Http\Controllers\LookfantasticScrapingController::class, 'shippingCostData']);
-Route::get('/gastosm', [App\Http\Controllers\MaquillaliaScrapingController::class, 'shippingCostData']);
+// Web Scraping producto y precios
+Route::get('/scraping/druni/productos', [App\Http\Controllers\DruniScrapingController::class, 'pageDate'])->name('productosDruni');
+// Web Scraping precios
+Route::get('/scraping/look/productos', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory'])->name('preciosLook');
+// Route::get('/scraping/maquillalia/productos', [App\Http\Controllers\MaquillaliaScrapingController::class, 'productsCategory']);
+
 
 Route::get('/', [App\Http\Controllers\ProductoController::class, 'top'])->name('top');
 Route::get('/marcas', [App\Http\Controllers\ProductoController::class, 'marcas'])->name('marcas');
 Route::get('/categorias', [App\Http\Controllers\ProductoController::class, 'categorias'])->name('categorias');
-Route::get('/categoria', [App\Http\Controllers\ProductoController::class, 'categorias'])->name('categorias');
 Route::get('/perfil', [App\Http\Controllers\UpdateUsersController::class, 'edit'])->name('perfil');
 Route::get('/update', [App\Http\Controllers\UpdateUsersController::class, 'update'])->name('update');
 Route::get('/cambiar', [App\Http\Controllers\CambiarController::class, 'edit'])->name('ea');
 Route::put('/cambiar', [App\Http\Controllers\CambiarController::class, 'update'])->name('password_update');
 
 Route::get('/prueba', [App\Http\Controllers\PruebaController::class, 'shippingCostData']);
+Route::resource('/productoShow', App\Http\Controllers\ProductoController::class);
+Route::get('/borrar', [App\Http\Controllers\DruniScrapingController::class, 'EliminarPrecios']);

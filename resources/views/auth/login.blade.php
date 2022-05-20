@@ -1,7 +1,8 @@
 @extends('layouts.loginandregister')
 
 @section('content')
-  <form class="container__form" method="POST" action="{{ route('login') }}" enctype="multipart/form-data">
+
+  <form class="container__form" method="POST" action="{{ route('login') }}" enctype="multipart/form-data" id="login">
     @csrf
     <p class="title--form">Iniciar sesión</p>
     <div class="form-group">
@@ -16,5 +17,4 @@
     <p class="text--form"><a class="text--link" href="{{ route('password.request') }}">He olvidado la contraseña?</a></p>
     <button type="submit" class="boton--form">{{ __('Log in') }}</button>
   </form>
-
-
+@endsection

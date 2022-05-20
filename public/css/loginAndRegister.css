@@ -58,6 +58,7 @@ body{
     color: #6d9eeb;
 }
 
+/* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MÓVIL~~~~~~~~~~~~ */
 @media (max-width: 600px) {
     .container__form{
         width: 100%;
@@ -67,5 +68,19 @@ body{
     }
     .boton--form{
         font-size: 4vw;
+    }
+}
+
+/* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MEDIA PANTALLA~~~~~~~~~~~~ */
+@media (max-width: 990px) {
+
+    .container__form{
+        width: 50%;
+    }
+    .title--form{
+        font-size: 3vw;
+    }
+    .boton--form{
+        font-size: 2vw;
     }
 }

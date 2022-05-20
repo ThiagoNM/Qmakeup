@@ -7,7 +7,7 @@
     <div class="centered">
         <label class="title">HOLA, BIENVENIDO!</label>
         <label class="text">Busca tu producto de maquillaje clicando</label>
-        <button class="boton--welcome">AQUÍ</button>
+        <button class="boton boton--welcome">AQUÍ</button>
     </div>
 </div>
 <br>
@@ -29,18 +29,22 @@
     @endphp
 
     @if($producto->valoracion >= 3 && $cont <= 3)
-    <div class="container__product">
-      <img class="img__product" src="{{ asset('imagenes/producto.jpg') }}" alt="">
-      <label for="" class="title--product">{{ $producto->nombre}}</label>
-      <p for="" class="text--product">{{ $producto->descripcion}}</p>
-      <div class="container__starsProduct">
-        <i class="bi bi-star-fill"></i>
-        <i class="bi bi-star"></i>
-        <i class="bi bi-star"></i>
-        <i class="bi bi-star"></i>
-        <label for="">{{ $producto->valoracion}}</label>
+
+      <div class="container__product">
+        <a class="nada" href="{{ route('productoShow.show', $producto, $producto)}}">
+        <img class="img__product" src="{{ $producto->imagen }}" alt="">
+        <label for="" class="title--product">{{ $producto->nombre}}</label>
+        <p for="" class="text--product">{{ $producto->descripcion}}</p>
+        <div class="container__starsProduct">
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star"></i>
+          <i class="bi bi-star"></i>
+          <i class="bi bi-star"></i>
+          <label for="">{{ $producto->valoracion}}</label>
+        </div>
+        </a>
       </div>
-    </div>
+
     @endif
 
     @endforeach
@@ -59,7 +63,6 @@
   </div>
   <div class="continer__business">
     <img src="{{ asset('imagenes/logo-DRUNI.png') }}" alt="">
-    <img src="{{ asset('imagenes/logo-primor.jpg') }}" alt="">
     <img src="{{ asset('imagenes/logo-lookfantastic.png') }}" alt="">
   </div>
 </div>

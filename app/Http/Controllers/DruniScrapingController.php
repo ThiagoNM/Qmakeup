@@ -11,8 +11,10 @@ use App\Models\PaginaExterna;
 use App\Models\CategoriaTienda;
 use App\Models\SubcategoriaTienda;
 use App\Models\Precio;
+use App\Models\Marca;
+use App\Models\Lista_de_deseo;
 use Illuminate\Support\Facades\Redirect;
-
+use Illuminate\Support\Facades\Log;
 
 class DruniScrapingController extends Controller
 {
@@ -20,6 +22,8 @@ class DruniScrapingController extends Controller
     private $url = "https://www.druni.es/";
     private $id_tienda = 0;
     private $urlSubcategoria = "";
+    private $id_subcategoria = 0;
+    private $url_producto = "";
 
     private $limiteArticulos = 1;
     private $lastPage = 1;
@@ -78,9 +82,10 @@ class DruniScrapingController extends Controller
             $gastosBalearesClean = str_replace(',','.',$gastosBalearesSymbol);
            
             $gastosBaleares = floatval($gastosBalearesClean);
-
             // Añadir en la base de datos la información sobre la tienda y la pagina web
-            // $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
+            $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
+            $this->crearPaginaExterna();
+
         }); 
 
     }
@@ -89,6 +94,21 @@ class DruniScrapingController extends Controller
 
     public function pageDate(Client $client)
     {
+        set_time_limit(7200);
+        $errors = [];
+
+        try {
+            // Eliminamos los productos y precios anteriores para subir a la base de datos los precios actuales
+            $this->eliminarListaDeseos();
+            $this->eliminarPrecios();
+            $this->eliminarProductos();
+        } catch (Exception $e) {
+            $msg = $e->getMessage();
+            // Pla A
+            Log::error($msg);
+            // Pla B
+            array_push($errors, $msg);
+        }
         // Recoger atributos
         $itemLimit = $this->limiteArticulos;
         $ultimaPagina = $this->lastPage;
@@ -99,6 +119,7 @@ class DruniScrapingController extends Controller
         $subcategorias = $this->recogerSubcategoriaTienda();
         foreach ($subcategorias as $subcategoria) 
         {
+
             $urlSubcategoria = $subcategoria->url_subcategoria;
             $this->urlSubcategoria = $urlSubcategoria;
             $pageUrl = "$urlSubcategoria";
@@ -118,16 +139,28 @@ class DruniScrapingController extends Controller
             $ultPagina = $limiteArt / $articulosXPagina;
             $ultPagina = intval(ceil($ultPagina));
             $this->lastPage = $ultPagina;
-
+            echo "<br>Limite de pagina recogido.";
             $this->extractProductsFrom($crawler, $client);
         }
-        
+        echo "Ya estan todos los productos de Druni recogidos";
+        echo "<h2>Errors:</h2>";
+        foreach($errors as $msg) {
+            echo "<pre>{$msg}</pre>";
+        }
+        if ($errors != null)
+        {
+            return view('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creadas correctamente.');
+        }
+        else{
+            return view('perfil')->with('error', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
+        }
 
     }
 
 
     public function extractProductsFrom(Crawler $crawler,Client $client)
     {
+        $errors = [];
 
         $ultPagina =  $this->lastPage;
         for ($i = 1; $i<=$ultPagina; $i++)
@@ -135,10 +168,11 @@ class DruniScrapingController extends Controller
             $urlSubcategoria = $this->urlSubcategoria;
 
             $pageUrl = $urlSubcategoria . "?p={$i}";
-            echo "URL: " . $pageUrl ;
+            
+            $this->id_subcategoria = $this->recogerIdSubcategoria();
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             $crawler = $client->request('GET', $pageUrl);
-
+            echo "<br>URL: " . $pageUrl;
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
             $inlineProductStyles = '"item product product-item"';
@@ -160,9 +194,12 @@ class DruniScrapingController extends Controller
 
                     $nombreProducto = $productNode->filter("[class='product-item-link']")->first()->text();
                     
+                    $url_producto = $productNode->filter("[class='product photo product-item-photo']")->first()->attr('href');
+                    $this->url_producto = $url_producto;
+                    
                     $marca = $productNode->filter("[class='product-brand']")->first()->text();
                     $descripcion = $productNode->filter("[class='product description product-item-description']")->first()->text();
-                    $precioNode = $productNode->filter("[data-price-type='finalPrice']")->first()->text();
+                    $precioNode = $productNode->filter("[data-price-type='finalPrice']")->attr('data-price-amount');
                     
                     // Si no tiene el producto un contenedor con la clase "price-container price-final_price tax weee" buscar con la data-price-type "finalPrice"
                     $precioDirty = explode("€", $precioNode);
@@ -170,15 +207,23 @@ class DruniScrapingController extends Controller
 
                     $precioFormat = str_replace(',','.',$precioClean);
                     $precio = floatval($precioFormat);
-
-                    $id_subcategoria = $this->recogerIdSubcategoria();
-                    echo "<br> ID SUBCATEGORIA: " . $id_subcategoria;
-                    echo "<br> Vamos a entrat";
-                    $this->crearProducto($img , $nombreProducto , $marca, $descripcion, $id_subcategoria);
                     
-                    // Recoger id producto
-                    $id_producto = $this->recogerIdProducto($nombreProducto);
-                    // $this->crearPrecio($id_producto, $precio);
+                    try {
+                        echo "<br>Precio:" . $precio;
+                        $this->crearMarca($marca);
+                        echo "<br> Nombre producto: " . $nombreProducto;
+                        $this->crearProducto($img , $nombreProducto, $marca , $descripcion);
+                    
+                        // Recoger id producto
+                        $id_producto = $this->recogerIdProducto($nombreProducto);
+                        $this->crearPrecio($id_producto, $precio);                
+                    } catch (Exception $e) {
+                        $msg = $e->getMessage();
+                        // Pla A
+                        Log::error($msg);
+                        // Pla B
+                        array_push($errors, $msg);
+                    }
                 }
             }); 
         }
@@ -188,7 +233,7 @@ class DruniScrapingController extends Controller
     public function recogerSubcategoriaTienda()
     {
         $id_tienda = $this->recogerIdTienda();
-        $subcategorias = SubcategoriaTienda::all()->where('id_tienda', '=',$id_tienda);
+        $subcategorias = SubcategoriaTienda::all()->where('id_tienda',$id_tienda);
         return $subcategorias;
     }
     
@@ -198,7 +243,6 @@ class DruniScrapingController extends Controller
     {
         //Nombre de la tienda
         $nombreTienda = $this->nombreTienda;
-
         $tiendas = Tienda::all();
         foreach ($tiendas as $tienda)
         {
@@ -206,9 +250,6 @@ class DruniScrapingController extends Controller
             {
                 return $tienda->id;
             }
-            // else{
-            //     return redirect()->route('index')->with('error', 'Error searching store id');            
-            // }
         }   
     }
 
@@ -221,16 +262,10 @@ class DruniScrapingController extends Controller
         foreach ($subcategorias as $subcategoria)
         {
 
-            echo "<br> SUBURL: ". $subcategoria->url   . "URL: ". $urlSubcategoria;
             if ($subcategoria->url_subcategoria == $urlSubcategoria)
             {
-                echo "<br> ------------------- SUBCATEGORIA ID: " . $subcategoria->id;
-
                 return $subcategoria->id;
             }
-            // else{
-            //     return redirect()->route('/')->with('error', 'Error searching category id');            
-            // }
         }
     }
 
@@ -244,9 +279,6 @@ class DruniScrapingController extends Controller
             {
                 return $producto->id;
             }
-            // else{
-            //     return redirect()->route('/')->with('error', 'Error searching product id');            
-            // }
         }
     }
 
@@ -254,6 +286,7 @@ class DruniScrapingController extends Controller
     // Crear tienda
     public function crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos )
     {
+        $this->eliminarTienda();
         $nombreTienda = $this->nombreTienda;
         $createDB = Tienda::create([
             "nombre" => $nombreTienda,
@@ -276,58 +309,164 @@ class DruniScrapingController extends Controller
             "url" => $url,
             "id_tienda" => $id_tienda,
         ]);
-        // if ($createDB)
-        // {
-        //     return redirect()->route('/')->with('success', 'Tienda created successfully.');
-
-        // }
-        // else{
-        //     return redirect()->route('/')->with('error', 'Error creating PaginaExterna');            
-        // }
     }
     
     // Crear producto 
-    public function crearProducto($img , $nombreProducto , $marca , $descripcion, $id_subcategoria)
+    public function crearMarca($marca)
     {
-        echo "<br> ID SUBCATEGORIA: " . $id_subcategoria;
+        try {
+            $ExisteMarca = Marca::where("marca", $marca)->exists();
+            if (!$ExisteMarca)
+            {
+                $marca = strtoupper($marca);
+                Marca::create([
+                    'marca' => $marca,
+                ]);
+                echo "<br>Marca creada.";
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+    }
+
+    // IdMarca
+    public function recogerIdMarca($marca)
+    {
+        $id_marca = Marca::all()->where("marca", $marca)->first()->id;
+        return $id_marca;
+    }
+
+    // Crear producto 
+    public function crearProducto($img , $nombreProducto , $marca, $descripcion)
+    {
         $id_tienda = $this->recogerIdTienda();
+        $id_marca = $this->recogerIdMarca($marca);
+        $id_subcategoria = $this->id_subcategoria;
+
         $valoracion = 0;
         Producto::create([
             "imagen" => $img,
             "nombre" => $nombreProducto,
-            "marca" => $marca,
+            "id_marca" => $id_marca,
             'id_subcategoria' => $id_subcategoria,
             "descripcion" => $descripcion,
             'valoracion'=> $valoracion,
             'id_tienda'=> $id_tienda
         ]);
-        echo "a salido";
-        // if ($createDB)
-        // {
-        //     return redirect()->route('/')->with('success', 'Tienda created successfully.');
-
-        // }
-        // else{
-        //     return redirect()->route('/')->with('error', 'Error creating Producto');            
-        // }
+        echo "<br>Producto creado.";
+        
     }
 
     // Crear precios 
     public function crearPrecio($id_producto , $precio)
     {
         $id_tienda = $this->recogerIdTienda();
+        $url_producto = $this->url_producto;
         $createDB = Precio::create([
             "id_producto" => $id_producto,
             'id_tienda'=> $id_tienda,
             "precio" => $precio,
+            "url_producto" => $url_producto
         ]);
-        // if ($createDB)
-        // {
-        //     return redirect()->route('/')->with('success', 'Tienda created successfully.');
+    }
+    // Eliminar precios  
+    public function eliminarPrecios ()
+    {
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $precios = Precio::all();
+            foreach($precios as $precio)
+            {
+                $precio->delete();
+            }
+            echo "<br>Precios eliminados.";
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 
-        // }
-        // else{
-        //     return redirect()->route('/')->with('error', 'Error creating Precio');            
-        // }
+    // Eliminar productos  
+    public function eliminarProductos ()
+    {
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $productos = Producto::all()->where("id_tienda", $id_tienda);
+            if($productos->count()>0)
+            {
+                foreach($productos as $producto)
+                {
+                    $producto->delete();
+                }
+                echo "<br>Producto eliminados.";
+            }
+            
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    // Eliminar tienda  
+    public function eliminarTienda ()
+    {
+        $this->eliminarListaDeseos();
+        $this->eliminarPrecios();
+        $this->eliminarProductos();
+        $this->eliminarSubcategoriasTienda();
+        $this->eliminarCategoriasTienda();
+
+        $id_tienda = $this->recogerIdTienda();
+        $tiendas = Tienda::all()->where("id", $id_tienda);
+        if($tiendas->count()>0)
+        {
+            foreach($tiendas as $tienda)
+            {
+                $tienda->delete();
+            }
+        }
+        return redirect()->view('/cd');
+    }
+
+    // Eliminar Categorias  
+    public function eliminarCategoriasTienda()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $categoriasTienda = CategoriaTienda::all()->where("id_tienda", $id_tienda);
+        if($categoriasTienda->count()>0)
+        {
+            foreach($categoriasTienda as $categoriaTienda)
+            {
+                $categoriaTienda->delete();
+            }
+        }
+    }
+    
+    // Eliminar Subcategorias  
+    public function eliminarSubcategoriasTienda()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $subcategoriasTienda = SubcategoriaTienda::all()->where("id_tienda", $id_tienda);
+        if($subcategoriasTienda->count()>0)
+        {
+            foreach($subcategoriasTienda as $subcategoriaTienda)
+            {
+                $subcategoriaTienda->delete();
+            }
+        }
+    }
+
+    // Eliminar lista de deseos  
+    public function eliminarListaDeseos()
+    {
+        $id_tienda = $this->recogerIdTienda();
+        $listasDeseos = Lista_de_deseo::all();
+        if($listasDeseos->count()>0)
+        {
+            foreach($listasDeseos as $listasDeseo)
+            {
+                $listasDeseo->delete();
+            }
+        }
     }
 }
+

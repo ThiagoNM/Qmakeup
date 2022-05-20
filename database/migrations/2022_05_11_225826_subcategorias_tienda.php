@@ -18,7 +18,7 @@ class SubcategoriasTienda extends Migration
             $table->string('nombre');
             $table->foreignId('id_subcategoria')
                     ->references('id')->on('subcategorias');
-            $table->string('url_categoria');
+            $table->string('url_subcategoria');
             $table->foreignId('id_tienda')
                 ->references('id')->on('tiendas');
             $table->timestamps();

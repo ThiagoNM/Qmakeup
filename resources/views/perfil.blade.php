@@ -10,66 +10,93 @@
             </div>
       @endif
 
+      @if( Auth::user()->id_rol == 2)
+      
+      @else
       <form class="container__form" action="{{ route('update' )}}" method="PUT">
         @csrf
         @method('PUT')
         <p class="title--container">Datos del usuario</p>
         <div class="form-group">
           <label for="Username">Usuario</label>
-          <input type="text" class="form-control" id="Username" name="name" placeholder="{{ $user->name }}">
+          <input type="text" class="form-control" id="Username" name="name" placeholder="{{$user->name}}">
         </div>
         <p class="text--form"><button type="submit" class="boton--form" >Actualizar nombre</button></p>
         <p class="text--form"><a class="text--link" href="{{route('ea')}}">Cambiar contraseña</a></p>
       </form>
+      @endif
 
-     
-      
+      @if( Auth::user()->id_rol == 2)
+      <p class="text--attention">  <i class="bi bi-exclamation-triangle-fill"></i> Tenga cuidado con los botones <i class="bi bi-exclamation-triangle-fill"></i></p>
+      <div class="container__king--admin">
+        <div class="container__admin">
+          <p class="title__admin">TIENDA DRUNI</p>
+          <form method="GET" action="{{ route('tiendaDruni') }}" >
+            @csrf
+            @method('GET')
+            <div class="container__options">
+              <label class="text__admin">Añadir tienda</label>
+              <button type="submit" class="boton boton--admin">Añadir</button>
+            </div>
+          </form>
 
+          <form method="GET" action="{{ route('categoriasDruni') }}" >
+            @csrf
+            @method('GET')
+            <div class="container__options">
+              <label class="text__admin">Añadir categorias y subcategorias</label>
+              <button type="submit" class="boton boton--admin">Añadir</button>
+            </div>
+          </form>
+
+          <form method="GET" action="{{ route('productosDruni') }}" >
+            @csrf
+            @method('GET')
+            <div class="container__options">
+              <label class="text__admin">Añadir productos y precios</label>
+              <button type="submit" class="boton boton--admin" onClick="">Añadir</button>
+            </div>
+          </form>
+        </div>  
+
+        <div class="container__admin">
+          <p class="title__admin">TIENDA LOOKFANTASTIC</p>
+          <form method="GET" action="{{ route('tiendaLook') }}" >
+            @csrf
+            @method('GET')
+            <div class="container__options">
+              <label class="text__admin">Añadir tienda</label>
+              <button type="submit" class="boton boton--admin">Añadir</button>
+            </div>
+          </form>
+
+          <form method="GET" action="{{ route('categoriasLook') }}" >
+            @csrf
+            @method('GET')
+            <div class="container__options">
+              <label class="text__admin">Añadir categorias y subcategorias</label>
+              <button type="submit" class="boton boton--admin">Añadir</button>
+            </div>
+          </form>
+
+          <form method="GET" action="{{ route('preciosLook') }}" >
+            @csrf
+            @method('GET')
+            <div class="container__options">
+              <label class="text__admin">Añadir precios (Para añadir los precios primero tiene que tener productos)</label>
+              <button type="submit" class="boton boton--admin">Añadir</button>
+            </div>
+          </form>
+        </div>  
+
+      </div>
+      @else
       <!-- PRODUCTOS TOP -->
       <label class="title title--container">Lista de deseos</label>
       <div class="container container--top">
 
-        <div class="container__product">
-          <img class="img__product" src="{{ asset('imagenes/producto.jpg') }}" alt="">
-          <label for="" class="title--product">Nombre</label>
-          <label for="" class="text--product">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Facere </label>
-          <div class="container__starsProduct">
-            <i class="bi bi-star-fill"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <label for="">xx</label>
-          </div>
-        </div>
-
-        <div class="container__product">
-          <img class="img__product" src="{{ asset('imagenes/producto.jpg') }}" alt="">
-          <label for="" class="title--product">Nombre</label>
-          <label for="" class="text--product">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Facere </label>
-          <div class="container__starsProduct">
-            <i class="bi bi-star-fill"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <label for="">xx</label>
-          </div>
-        </div>
-
-        <div class="container__product">
-          <img class="img__product" src="{{ asset('imagenes/producto.jpg') }}" alt="">
-          <label for="" class="title--product">Nombre</label>
-          <label for="" class="text--product">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Facere </label>
-          <div class="container__starsProduct">
-            <i class="bi bi-star-fill"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <label for="">xx</label>
-          </div>
-        </div>
-
       </div>
-
+      @endif
     </div>
 
   </div>

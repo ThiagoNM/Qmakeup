@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>QmakeUp</title>
     <!-- Link para boostrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Link para iconos -->
@@ -25,19 +25,19 @@
               <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                   <li class="nav-item">
-                    <a class="nav-link active boton--nav" aria-current="page" href="{{ route('top') }}">Inicio</a>
+                    <a class="nav-link active boton__nav" aria-current="page" href="{{ route('top') }}">Inicio</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link boton--nav" href="{{ route('marcas') }}">Marcas</a>
+                    <a class="nav-link boton__nav" href="{{ route('marcas') }}">Marcas</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link boton--nav" href="{{ route('categorias') }}">Categorias</a>
+                    <a class="nav-link boton__nav" href="{{ route('categorias') }}">Categorias</a>
                   </li>
                 </ul>
 
 
                 @if(Auth::user()!=null)
-                  <a class="icono icono--navbar" type="button" href="{{ route('perfil') }}"><i class="bi bi-person"></i></a> 
+                  <a class="icono icono--navbar" type="button" href="{{ route('perfil') }}"><i class="bi bi-person"></i></a>
                   <form method="POST" action="{{ route('logout') }}" class="form--navbar">
                         @csrf
 
@@ -48,8 +48,8 @@
                         <a>
                     </form>
                 @else
-                  <a class="nav-link boton--nav" href="{{ route('login') }}">Iniciar sesión</a>
-                  <a class="nav-link boton--nav" href="{{ route('register') }}">Registrase</a>
+                  <a class="nav-link boton__nav boton__nav--secondary" href="{{ route('login') }}">Iniciar sesión</a>
+                  <a class="nav-link boton__nav boton__nav--secondary" href="{{ route('register') }}">Registrase</a>
                 @endif
 
               </div>

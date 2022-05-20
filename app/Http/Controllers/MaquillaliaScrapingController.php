@@ -35,11 +35,12 @@ class MaquillaliaScrapingController extends Controller
         $articulosXPagina = $this->itemsXPage;
         // ULTIMA PAGINA
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
-     
-        $categorias = ['labiales-liquidos-c-1678_17_1685']; 
-        foreach ($categorias as $categoria) {
+        $subcategorias = $this->recogerSubcategoriaTienda();
+        foreach ($subcategorias as $subcategoria) {
 
-            $pageUrl = "https://www.maquillalia.com/{$categoria}.html";
+            $urlSubcategoria = $subcategoria->url_subcategoria;
+            $this->urlSubcategoria = $urlSubcategoria;
+            $pageUrl = "$urlSubcategoria";
             echo "<br> url: " . $pageUrl . "<br>" ;
                 
             $crawler = $client->request('GET', $pageUrl);
@@ -60,17 +61,17 @@ class MaquillaliaScrapingController extends Controller
             $ultPagina = $limiteArt / $articulosXPagina;
             $ultPagina = intval(ceil($ultPagina));
             $this->lastPage = $ultPagina;
-            $this->extractProductsFrom($crawler, $client ,$categoria);
+            $this->extractProductsFrom($crawler, $client ,$urlSubcategoria);
         }
     }
 
 
-    public function extractProductsFrom(Crawler $crawler, $client, $categoria)
+    public function extractProductsFrom(Crawler $crawler, $client, $urlSubcategoria)
     {
         $ultPagina = $this->lastPage;
         for ($i = 0; $i<=$ultPagina; $i++)
         {
-            $pageUrl = "https://www.maquillalia.com/{$categoria}.html?page={$i}";
+            $pageUrl = $urlSubcategoria;
             
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             $crawler = $client->request('GET', $pageUrl);
@@ -179,10 +180,9 @@ class MaquillaliaScrapingController extends Controller
 
         }); 
 
-        dd("Hola");
         // Nombre de la tienda
         $this->crearTienda();
-        $this->crearPaginasExternas();
+        $this->crearPaginaExterna();
     }
 
     // Crear tienda
@@ -237,8 +237,7 @@ class MaquillaliaScrapingController extends Controller
         $subcategorias = $this->recogerSubcategoriaTienda();
         foreach ($subcategorias as $subcategoria)
         {
-
-            echo "<br> SUBURL: ". $subcategoria->url   . "URL: ". $urlSubcategoria;
+            echo "<br> SUBURL: ". $subcategoria->url_subcategoria   . "URL: ". $urlSubcategoria;
             if ($subcategoria->url_subcategoria == $urlSubcategoria)
             {
                 echo "<br> ------------------- SUBCATEGORIA ID: " . $subcategoria->id;
@@ -255,7 +254,8 @@ class MaquillaliaScrapingController extends Controller
     public function recogerIdProducto($nombreProducto)
     {
         $id_subcategoria = $this->recogerIdSubcategoria();
-        $productos = Producto::all()->where("id_subcategoria" , "=" , $id_subcategoria );
+        dd($id_subcategoria);
+        $productos = Producto::all()->where("id_subcategoria", $id_subcategoria);
         foreach ($productos as $producto)
         {
             $NameProduct = $producto->nombre;
@@ -291,23 +291,6 @@ class MaquillaliaScrapingController extends Controller
             throw $th;
         }
 
-    }
-    
-    // Crear producto 
-    public function crearProducto($img , $nombreProducto , $marca , $descripcion, $id_subcategoria)
-    {
-        echo "<br> ID SUBCATEGORIA: " . $id_subcategoria;
-        $id_tienda = $this->recogerIdTienda();
-        $valoracion = 0;
-        Producto::create([
-            "imagen" => $img,
-            "nombre" => $nombreProducto,
-            "marca" => $marca,
-            'id_subcategoria' => $id_subcategoria,
-            "descripcion" => $descripcion,
-            'valoracion'=> $valoracion,
-            'id_tienda'=> $id_tienda
-        ]);
     }
 
     // Crear precios 

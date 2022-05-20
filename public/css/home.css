@@ -92,6 +92,20 @@ body{
     width: 100%;
 }
 
+.container__search{
+  display: flex;
+  justify-content: flex-start;
+  width: 25%;
+}
+
+.container__search--category{
+  margin-left: 5%
+}
+
+.input__search{
+  border-radius: 5px 0px 0px 5px
+}
+
 /* Texto encima de la imagen */
 .centered {
     position: absolute;
@@ -109,16 +123,12 @@ body{
 }
 
 .container__king--category{
-    margin-top: 3%;
-    margin-bottom: 3%;
+    margin: auto;
+    margin-top: 2%;
+    width: 85%;
+    padding: 2%;
 }
 
-.container__king--brands{
-    display: flex;
-    flex-direction: row;
-    margin-top: 2%;
-    width: 92%;
-}
 
 .container__king--details{
     width: 100%;
@@ -128,7 +138,7 @@ body{
 .container__top{
     width: 80%;
     margin-bottom: 5%;
-    padding-bottom: 1%;   
+    padding-bottom: 1%;
     padding: 10%;
 }
 
@@ -201,15 +211,40 @@ body{
 
 .container--brands{
     background-color: transparent;
-    margin: 0%;
-    width: 80%;
+    margin: 0;
+    width: 100%;
 }
 
+.container__global--brands{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    padding: 5%;
+}
+
+
+.container__king--brands{
+    display: flex;
+    flex-direction: row;
+    margin-top: 2%;
+    width: 100%;
+    margin-bottom: 5%;
+}
+
+
 .container__alphabet{
-    width: 13%;
+    width: 25%;
     background-color: #272727;
     padding: 2%;
     border-radius: 5px;
+    overflow-y: scroll;
+    max-height: 1218px;
+}
+
+.container__paginador
+{
+    margin-left: 45%;
 }
 
 .container__alphabet--card{
@@ -231,7 +266,7 @@ body{
 }
 
 .input-group{
-    width: 300px; 
+    width: 300px;
     margin-left: 4%;
 }
 
@@ -247,34 +282,13 @@ body{
 .container__price{
     background-color: #ead1dc;
     border-radius: 10px;
-    width: 40%;
+    width: 50%;
     padding: 2%;
     margin-top: 5%;
 }
 
 /* ~~~~ ESTILOS DE LOS BOTONES ~~~~ */
-/* Boton de buscar producto */
-.boton--search{
-    border: #6d9eeb solid 1px;
-    color: black;
-    background-color: #6d9eeb;
-}
-
-/* Boton de barra de navegación */
-.boton--nav{
-    color: #6d9eeb;
-    font-weight: bold;
-    border-radius: 5px;
-    border: 0px solid transparent;
-}
-
-.boton--nav:hover{
-    transition: 0.5s;
-    background-color: #ead1dc;
-}
-
-/* Boton de la bienvenido */
-.boton--welcome{
+.boton{
     background-color: #ead1dc;
     color: #6d9eeb;
     box-shadow: 5px 5px 5px black ;
@@ -283,6 +297,29 @@ body{
     padding: 1%;
     font-size: 1.5vw;
 }
+
+/* Boton de buscar producto */
+.boton--search{
+    border: #6d9eeb solid 1px;
+    color: black;
+    background-color: #6d9eeb;
+    border-radius: 0px 5px 5px 0px
+}
+
+/* Boton de barra de navegación */
+.boton__nav{
+    color: #6d9eeb;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 0px solid transparent;
+}
+
+.boton__nav:hover{
+    transition: 0.5s;
+    background-color: #ead1dc;
+}
+
+/* Boton de la bienvenido */
 .boton--welcome:hover{
     background-color: #e5bacd;
 }
@@ -291,10 +328,6 @@ body{
 .boton--form{
     background-color: #6d9eeb;
     color: #272727;
-    box-shadow: 5px 5px 5px black ;
-    border-radius: 5px;
-    border: #6d9eeb solid 1px;
-    padding: 1%;
     font-size: 1vw;
 }
 
@@ -312,19 +345,19 @@ body{
 
 /* Titulo o nombre del productp */
 .title--product{
-    font-size: 1.5vw; 
+    font-size: 1.5vw;
     color: #6d9eeb;
 }
 
 /* Titulo del contendor */
 .title--container{
-    font-size: 1.6vw; 
+    font-size: 1.6vw;
     font-weight: bold;
 }
 
 /* Titlo más pequeño */
 .title--question{
-    font-size: 1vw; 
+    font-size: 1vw;
     text-align: center;
     margin-top: 3%;
 }
@@ -357,6 +390,10 @@ body{
     font-size: 1vw;
 }
 
+.bolder{
+  font-weight: bold;
+}
+
 .text--alphabet{
     color: #6d9eeb;
     margin-left: 10%;
@@ -364,7 +401,7 @@ body{
 }
 
 .text--price{
-    font-size: 1.1vw;   
+    font-size: 1.1vw;
     font-weight: bold;
 }
 
@@ -373,6 +410,7 @@ body{
 .img__product{
     width: 100%;
     margin-bottom: 5%;
+    background-color: white;
 }
 
 .img__product--details{
@@ -396,7 +434,7 @@ body{
 
 /* Estilo del logo */
 .logo{
-    width: 100%;        
+    width: 100%;
     float: left;
 }
 
@@ -409,6 +447,7 @@ footer{
     color: #5e6268;
     text-align: center;
     margin-top: 5%;
+
 }
 
 /* Estilo del label del footer*/
@@ -417,9 +456,50 @@ footer{
     color: #6d9eeb;
     font-size: 1.1vw;
 }
+/* ~~~~~~~~~~~~ PERFIL ADMINISTRADOR ~~~~~~~~~~~~ */
+.container__king--admin{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 100%;
+    margin-top: 3%;
+}
 
+.container__admin{
+    background-color: #e5ecf8;
+    width: 50%;
+    border: 1px solid #558de7;
+    border-radius: 5px;
+    margin: 1%;
+}
 
-/* ~~~~~~~~~~~~ RESPOSIVE ~~~~~~~~~~~~ */
+.container__options{
+    display: flex;
+    justify-content: space-between;
+    padding: 5%;
+}
+
+.title__admin{
+    font-size: 2vw;
+    text-align: center;
+    font-weight: bolder;
+}
+.text__admin{
+    font-size: 1.5vw;
+    margin-top: 2%;
+}
+.text--attention{
+    font-size: 1.5vw;
+    margin-top: 4%;
+    font-weight: bold;
+    text-align: center;
+}
+
+.boton--admin{
+    width: 20%;
+}
+
+/* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MÓVIL~~~~~~~~~~~~ */
 @media (max-width: 600px) {
     .navbar--logo {
         width: 50%;
@@ -435,6 +515,7 @@ footer{
 
     .container__product{
         width: 100%;
+        padding: 2%;
     }
 
     .container--top{
@@ -466,7 +547,7 @@ footer{
         width: 100%;
         font-size: 5vw;
     }
-    
+
     .container__price{
         width: 100%;
     }
@@ -488,9 +569,9 @@ footer{
         margin: auto;
         width: 100%;
     }
-    
+
     /* Botones */
-    .boton--nav{
+    .boton__nav{
         font-size: 7vw;
     }
 
@@ -520,13 +601,13 @@ footer{
     }
 
     .text{
-        font-size: 5vw;    
+        font-size: 5vw;
     }
 
     .text--product{
         font-size: 5vw;
     }
-    
+
     .labelFooter{
         font-size: 4vw;
     }
@@ -539,4 +620,61 @@ footer{
     .img__product--details{
         width: 80%;
     }
+}
+
+/* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MEDIA PANTALLA~~~~~~~~~~~~ */
+@media (max-width: 990px) {
+
+  /* Barra de navegación */
+  .nav-item{
+    padding: 0.5%;
+    margin: 1%;
+  }
+  .boton__nav{
+    font-size: 2.5vw;
+  }
+  .boton__nav--secondary{
+    padding-left: 2%;
+  }
+  /* Contendor general de marcas */
+  .container__king--brands{
+    max-height: 800px;
+    height: 10%;
+  }
+
+  /* Buscador */
+  .container__search{
+    width: 40%;
+  }
+
+  /* Contenedor de productos */
+  .container__product{
+    width: 30%;
+  }
+  .title--product{
+    font-size: 2vw;
+  }
+  .text--product{
+    font-size: 1.7vw;
+  }
+
+  /* Producto */
+  .img__product--details{
+    width: 40%;
+  }
+  .title--details{
+    font-size: 3vw;
+  }
+  .text--product, .container__starsProduct, .title--table{
+    font-size: 2vw;
+  }
+  .container__price{
+    width: 100%;
+  }
+  .tabla__precios{
+    width: 90%;
+  }
+  .icono{
+    font-size: 3vw;
+  }
 }
