@@ -15,9 +15,9 @@
     <div class="container__king container__king--brands" >
       <div class="container__alphabet">
 
-      @foreach ($marcas as $marca)
-        <p style="color:white;">{{ $marca->marca}}</p>
-      @endforeach
+        @foreach ($marcas as $marca)
+          <p style="color:white;">{{ $marca->marca}}</p>
+        @endforeach
 
       </div>
 

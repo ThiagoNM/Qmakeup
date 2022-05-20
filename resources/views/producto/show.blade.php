@@ -3,7 +3,6 @@
 @section('content')
       <!-- CONTENEDOR PARA CENTRAR -->
     <div class="container__king container__king--details">
-
       <div class="container__details">
         <img class="img__product--details" src="{{$producto->imagen}}" alt="">
         <div class="container__product--details">

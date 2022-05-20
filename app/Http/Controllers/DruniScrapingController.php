@@ -162,6 +162,7 @@ class DruniScrapingController extends Controller
     {
         $errors = [];
 
+        set_time_limit(300);
         $ultPagina =  $this->lastPage;
         for ($i = 1; $i<=$ultPagina; $i++)
         {
@@ -227,6 +228,7 @@ class DruniScrapingController extends Controller
                 }
             }); 
         }
+        echo "Terminado";
     }
 
 
@@ -424,7 +426,6 @@ class DruniScrapingController extends Controller
                 $tienda->delete();
             }
         }
-        return redirect()->view('/cd');
     }
 
     // Eliminar Categorias  

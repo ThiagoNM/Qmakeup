@@ -79,7 +79,6 @@ class LookfantasticScrapingController extends Controller
 
     public function extractProductsFrom(Crawler $crawler)
     {
-
         set_time_limit(300);
         // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
         $inlineProductStyles = '"productBlock"';
@@ -217,7 +216,6 @@ class LookfantasticScrapingController extends Controller
 
                 $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
                 $this->crearPaginaExterna();
-
                 $cont ++;
             }
         }); 

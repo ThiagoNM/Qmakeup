@@ -269,14 +269,19 @@ class DruniCategoriaScrapingController extends Controller
     
     public function crearCategoriaTienda($nombreCategoria, $ruta_categoria)
     {
-        $id_tienda = $this->recogerIdTienda();
-        $id_categoria = $this->recogerIdCategoria($nombreCategoria);
-        CategoriaTienda::create([
-            'nombre' => $nombreCategoria,
-            'id_categoria' => $id_categoria,
-            'url_categoria' => $ruta_categoria,
-            'id_tienda' => $id_tienda
-        ]);
+        try {
+            $id_tienda = $this->recogerIdTienda();
+            $id_categoria = $this->recogerIdCategoria($nombreCategoria);
+            CategoriaTienda::create([
+                'nombre' => $nombreCategoria,
+                'id_categoria' => $id_categoria,
+                'url_categoria' => $ruta_categoria,
+                'id_tienda' => $id_tienda
+            ]);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
     }
     
     

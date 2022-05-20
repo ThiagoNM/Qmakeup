@@ -1,8 +1,7 @@
 @extends('layouts.loginandregister')
 
 @section('content')
-
-  <form class="container__form" method="POST" action="{{ route('login') }}" enctype="multipart/form-data" id="login">
+  <form class="container__form" method="POST" action="{{ route('login') }}" enctype="multipart/form-data">
     @csrf
     <p class="title--form">Iniciar sesión</p>
     <div class="form-group">
