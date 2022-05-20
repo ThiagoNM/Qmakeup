@@ -16,6 +16,7 @@ class Producto extends Model
         'id_subcategoria',
         "descripcion",
         'valoracion',
-        'id_tienda'
+        'id_tienda',
+        'valoracion_media'
     ];
 }

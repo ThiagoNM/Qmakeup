@@ -178,7 +178,9 @@ body{
     margin-top: 2%;
     margin-bottom: 2%;
 }
-
+.link__product{
+    text-decoration: none;
+}
 .continer__business img{
     width: 20%;
 }
@@ -418,6 +420,37 @@ footer{
     font-size: 1.1vw;
 }
 
+/* Estrellas */
+.rating-css div {
+    color: #7900FF;
+    font-size: 30px;
+    font-family: sans-serif;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    padding: 20px 0;
+}
+.rating-css input {
+    display: none;
+}
+.rating-css input + label {
+    font-size: 60px;
+    text-shadow: 1px 1px 0 #8f8420;
+    cursor: pointer;
+}
+.rating-css input:checked + label ~ label {
+    color: #b4afaf;
+}
+.rating-css label:active {
+    transform: scale(0.8);
+    transition: 0.3s ease;
+}
+
+.checked{
+    color:#7900FF;
+}
+
+
 
 /* ~~~~~~~~~~~~ RESPOSIVE ~~~~~~~~~~~~ */
 @media (max-width: 600px) {
@@ -539,4 +572,5 @@ footer{
     .img__product--details{
         width: 80%;
     }
+    
 }
