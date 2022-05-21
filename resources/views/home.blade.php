@@ -5,7 +5,7 @@
 <div class="container__welcome">
     <video src="{{ asset('videos/How to Light a MAKEUP ad.mp4') }}" autoplay muted loop></video>
     <div class="centered">
-        <label class="title">HOLA, BIENVENIDO!</label>
+        <label class="title">BIENVENIDO!</label>
         <label class="text">Busca tu producto de maquillaje clicando</label>
         <button class="boton boton--welcome">AQUÍ</button>
     </div>

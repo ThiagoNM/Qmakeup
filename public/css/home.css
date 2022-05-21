@@ -242,12 +242,13 @@ body{
     padding: 2%;
     border-radius: 5px;
     overflow-y: scroll;
-    max-height: 1218px;
+    max-height: 1800px;
+    height: 100%;
 }
 
 .container__paginador
 {
-    margin-left: 45%;
+    margin: auto;
 }
 
 .alphabet__brand{
@@ -623,7 +624,7 @@ footer{
 }
 
 /* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MEDIA PANTALLA~~~~~~~~~~~~ */
-@media (max-width: 990px) {
+@media (min-width: 601px ) and (max-width: 990px) {
 
   /* Barra de navegación */
   .nav-item{
@@ -677,4 +678,30 @@ footer{
   .icono{
     font-size: 3vw;
   }
+
+  /* MARCAS */
+    
+    .container--brands{
+        height: 100%;
+    }
+
+    .container__global--brands{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+
+    .container__king--brands{
+        max-height: 1150px;
+        height: 100%;
+    }
+
+
+    .container__alphabet{
+        overflow-y: scroll;
+        max-height: 810px;
+        height: 100%;
+    }
+
 }

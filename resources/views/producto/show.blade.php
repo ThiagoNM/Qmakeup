@@ -33,7 +33,7 @@
             <p class="text--product">Gastos de envio Baleares: {{$tienda->gastos_baleares}}€</p>
             <p class="text--product">Gastos de envio Peninsula: {{$tienda->gastos_peninsula}}€</p>
             <p class="text--product">A partir de: {{$tienda->gastos_minimos}}€ envios gratis.</p>
-            <p class="text--product">De la tienda: <a href="{{$pagina_e->where('id_tienda', $tienda->id)->first()->url}}}" target="_blank"> {{ucfirst($tienda->nombre)}} </a> </p>
+            <p class="text--product">De la tienda: <a href="{{$pagina_e->where('id_tienda', $tienda->id)->first()->url}}" target="_blank"> {{ucfirst($tienda->nombre)}} </a> </p>
           </div>
         </div>
       </div>
