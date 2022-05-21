@@ -117,6 +117,9 @@ Route::get('/update', [App\Http\Controllers\UpdateUsersController::class, 'updat
 Route::get('/cambiar', [App\Http\Controllers\CambiarController::class, 'edit'])->name('ea');
 Route::put('/cambiar', [App\Http\Controllers\CambiarController::class, 'update'])->name('password_update');
 
-Route::get('/prueba', [App\Http\Controllers\PruebaController::class, 'hola'])->middleware(['auth', 'id_rol:2']);
 Route::resource('/productoShow', App\Http\Controllers\ProductoController::class);
 Route::get('/borrar', [App\Http\Controllers\DruniScrapingController::class, 'EliminarPrecios']);
+Route::get('/filtro/{id}', [App\Http\Controllers\ProductoController::class, 'Filtroid'])->name('find');
+Route::get('/subcate/{id}', [App\Http\Controllers\ProductoController::class, 'Subcategorias'])->name('subcate');
+Route::get('/wishlist/{id}',[App\Http\Controllers\WishlistController::class, 'pedro'])->name('lista');
+Route::post('/add-rating',[App\Http\Controllers\RatingController::class, 'add'])->name('add-rating');

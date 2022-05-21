@@ -86,6 +86,7 @@ body{
     position: relative;
     text-align: center;
     margin-bottom: 2%;
+    
 }
 
 .container__welcome video{
@@ -182,6 +183,25 @@ body{
     text-decoration:none;
 }
 
+.usuarios__productos{
+    display: flex;
+    justify-content: row;
+    font-size:2vw;
+}
+
+.icon--valorar{
+    font-size: 1.5vw;
+}
+
+.icon--whislist{
+    font-size: 2vw;
+}
+.boton--valorar{
+    border-radius: 100%;
+    margin-right: 2%;
+}
+
+
 /* Contendor con las tiendas con las que trabajamos */
 .continer__business{
     display: flex;
@@ -191,7 +211,9 @@ body{
     margin-top: 2%;
     margin-bottom: 2%;
 }
-
+.link__product{
+    text-decoration: none;
+}
 .continer__business img{
     width: 20%;
 }
@@ -253,6 +275,7 @@ body{
 
 .alphabet__brand{
     color:white;
+    text-decoration: none;
 }
 
 .container__form{
@@ -293,7 +316,6 @@ body{
     background-color: #ead1dc;
     color: #6d9eeb;
     box-shadow: 5px 5px 5px black ;
-    border-radius: 5px;
     border: #6d9eeb solid 1px;
     padding: 1%;
     font-size: 1.5vw;
@@ -321,6 +343,9 @@ body{
 }
 
 /* Boton de la bienvenido */
+.boton--welcome{
+    border-radius: 5px;
+}
 .boton--welcome:hover{
     background-color: #e5bacd;
 }
@@ -420,7 +445,7 @@ body{
 /* Estilo predeterminado del los iconos */
 .icono{
     color:#6d9eeb;
-    font-size: 1.5vw;
+    font-size: 2vw;
 }
 
 /* Estilo de icono del footer */
@@ -496,8 +521,39 @@ footer{
     text-align: center;
 }
 
+/* Estrellas */
+.rating-css div {
+    color: #7900FF;
+    font-size: 30px;
+    font-family: sans-serif;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    padding: 20px 0;
+}
+.rating-css input {
+    display: none;
+}
+.rating-css input + label {
+    font-size: 60px;
+    text-shadow: 1px 1px 0 #8f8420;
+    cursor: pointer;
+}
+.rating-css input:checked + label ~ label {
+    color: #b4afaf;
+}
+.rating-css label:active {
+    transform: scale(0.8);
+    transition: 0.3s ease;
+}
+
+.checked{
+    color:#7900FF;
+}
+
 .boton--admin{
     width: 20%;
+    border-radius: 5px;
 }
 
 /* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MÓVIL~~~~~~~~~~~~ */
@@ -621,66 +677,94 @@ footer{
     .img__product--details{
         width: 80%;
     }
+
+    .fa-star{
+        font-size: 8vw;
+    }
+    .text-rating{
+        font-size: 8vw
+    }
+    .icon--valorar{
+        font-size: 10vw;
+    }
+
+    .boton--valorar{
+        margin-right: 10%;
+    }
+
+    .icon--whislist{
+        font-size: 10vw;
+    }
 }
 
 /* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MEDIA PANTALLA~~~~~~~~~~~~ */
 @media (min-width: 601px ) and (max-width: 990px) {
 
-  /* Barra de navegación */
-  .nav-item{
-    padding: 0.5%;
-    margin: 1%;
-  }
-  .boton__nav{
-    font-size: 2.5vw;
-  }
-  .boton__nav--secondary{
-    padding-left: 2%;
-  }
-  /* Contendor general de marcas */
-  .container__king--brands{
-    max-height: 800px;
-    height: 10%;
-  }
+    .icon--valorar{
+        font-size: 4vw;
+    }
 
-  /* Buscador */
-  .container__search{
+    .icon--whislist{
+        font-size: 4vw;
+    }
+    .text--price{
+        font-size: 2vw;
+    }
+    /* Barra de navegación */
+    .nav-item{
+        padding: 0.5%;
+        margin: 1%;
+    }
+    .boton__nav{
+        font-size: 2.5vw;
+    }
+    .boton__nav--secondary{
+        padding-left: 2%;
+    }
+    /* Contendor general de marcas */
+    .container__king--brands{
+        max-height: 800px;
+        height: 10%;
+    }
+
+    /* Buscador */
+    .container__search{
     width: 40%;
-  }
+    }
 
-  /* Contenedor de productos */
-  .container__product{
-    width: 30%;
-  }
-  .title--product{
-    font-size: 2vw;
-  }
-  .text--product{
-    font-size: 1.7vw;
-  }
+    /* Contenedor de productos */
+    .container__product{
+        width: 30%;
+    }
+    .title--product{
+        font-size: 2vw;
+    }
+    .text--product{
+        font-size: 1.7vw;
+    }
 
-  /* Producto */
-  .img__product--details{
-    width: 40%;
-  }
-  .title--details{
-    font-size: 3vw;
-  }
-  .text--product, .container__starsProduct, .title--table{
-    font-size: 2vw;
-  }
-  .container__price{
-    width: 100%;
-  }
-  .tabla__precios{
-    width: 90%;
-  }
-  .icono{
-    font-size: 3vw;
-  }
+    /* Producto */
+    .img__product--details{
+        width: 40%;
+    }
+    .title--details{
+        font-size: 3vw;
+    }
+    .text--product, .container__starsProduct, .title--table{
+        font-size: 2vw;
+    }
+    .container__price{
+        width: 100%;
+    }
+    .tabla__precios{
+        width: 90%;
+    }
+    .icono{
+        font-size: 3vw;
+    }
 
-  /* MARCAS */
-    
+    /* MARCAS */
+
     .container--brands{
         height: 100%;
     }

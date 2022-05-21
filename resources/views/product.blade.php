@@ -12,10 +12,6 @@
           <label class="title title--details">{{ $producto->nombre}}</label>
           <label class="text--product">{{ $producto->descripcion}}</label>
           <div class="container__starsProduct container__starsProduct--details">
-            <i class="bi bi-star-fill"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
             <label >{{ $producto->valoracion}} Valoraciones</label>
           </div>
           <a class="icono icono--navbar" type="button" href="#"><i class="bi bi-heart"></i></a>    

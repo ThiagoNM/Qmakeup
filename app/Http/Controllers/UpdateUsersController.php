@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Rating;
+use App\Models\Producto;
+use App\Models\Lista_de_deseo;
+use App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 
 class UpdateUsersController extends Controller
@@ -56,9 +60,17 @@ class UpdateUsersController extends Controller
      */
     public function edit()
     {
+        $producto = [];
+        $ok = Lista_de_deseo::all()->where('id_usuario' ,'=',\Auth::user()->id);
+        foreach ($ok as $elemento) {
+            array_push($producto, Producto::all()->where('id', '=',$elemento->id_producto)->first());
+        }
+        $productos = Producto::all()->where("id")->first();
+        $ratings = Rating::all();
         return view('perfil',[
-            'user' => \Auth::user()
-        ]);
+            'user' => \Auth::user(),
+            'productos' => $producto
+        ],compact('ratings','productos'));
     }
 
     /**

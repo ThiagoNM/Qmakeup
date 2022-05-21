@@ -1,6 +1,7 @@
 @extends('layouts.loginandregister')
 
 @section('content')
+  @include('flash')
   <form class="container__form" method="POST" action="{{ route('login') }}" enctype="multipart/form-data">
     @csrf
     <p class="title--form">Iniciar sesión</p>

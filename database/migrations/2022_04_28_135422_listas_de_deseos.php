@@ -21,6 +21,7 @@ class ListasDeDeseos extends Migration
             $table->foreignId('id_usuario')
                   ->nullable()
                   ->references('id')->on('users');
+            $table->boolean('estado');     
             $table->timestamps();
         });
     }

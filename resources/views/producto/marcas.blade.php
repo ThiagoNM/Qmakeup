@@ -4,50 +4,50 @@
   <div class="container__global--brands">
 
     <!-- HERRAMIENTA DE BUSQUEDA -->
-    <form class="container__search">
-          <input class="form-control input__search" type="search" placeholder="Search" id="search" name="search" aria-label="Search">
-          <button class="btn boton--search" type="submit"><i class="bi bi-search"></i></button>
-    </form>
-
+    @if(strpos(Request::url(), '/filtro/'))
+    @else
+      <form class="container__search container__search--category">
+            <input class="form-control input__search" type="search" placeholder="Search" id="search" name="search" aria-label="Search">
+            <button class="btn boton--search" type="submit"><i class="bi bi-search"></i></button>
+      </form>
+    @endif
 
       <!-- CONTENEDOR PARA CENTRAR -->
     <div class="container__king container__king--brands" >
-      <div class="container__alphabet">
-
-        @foreach ($marcas as $marca)
-          <p class="alphabet__brand">{{ $marca->marca}}</p>
-        @endforeach
-
+        <div class="container__alphabet">
+        <form action="{{route('marcas')}}">
+          @foreach ($marcas as $marca)
+            <p><a class="alphabet__brand" id="filtro" href="{{ route('find', $marca->id)}}">{{ $marca->marca}}</a></p>
+          @endforeach
+        </form>
       </div>
 
       <!-- PRODUCTOS -->
-
+      <div class="container__king container__king--category" >
       <div class="container container--brands">
+        @php($cont = 0)
         @foreach ($productos as $producto)
-
         <div class="container__product">
           <a class="link__product" href="{{ route('productoShow.show', $producto, $producto)}}">
           <img class="img__product" src="{{ $producto->imagen }}" alt="">
           <label for="" class="title--product">{{ $producto->nombre}}</label>
           <p for="" class="text--product">{{ $producto->descripcion}}</p>
           <div class="container__starsProduct">
-            <i class="bi bi-star-fill"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <i class="bi bi-star"></i>
-            <label for="">{{ $producto->valoracion}}</label>
+            @php($ratenum = $producto->valoracion_media)
+          <div class="rating">
+            @for($i=1; $i<= $ratenum; $i++)
+              <i class="fa fa-star checked"></i>
+            @endfor
+            @for($j = $ratenum+1; $j <=5; $j++)
+              <i class="fa fa-star"></i>
+            @endfor
+          </div>
           </div>
           </a>
         </div>
-
+        @php($cont++)
         @endforeach
-      </div>
-
-    </div>
-    <div class="container__paginador">
-      {{ $productos->appends(request()->input())->links()}}
-      </div>
-
-  </div>
-
+      </div> 
+          {{ $productos->appends(request()->input())->links()}}
+    </div> 
 @endsection

@@ -49,13 +49,13 @@ class LookfantasticCategoriaScrapingController extends Controller
             array_push($errors, $msg);
             $this->errors = $errors;
         }
-        $errors = $this->erros;
+        $errors = $this->errors;
         if ($errors != null)
         {
-            return view('perfil')->with('success', 'Las categorias y subcategorias de la tienda Lookfantastic han sido creadas correctamente.');
+            return redirect()->route('perfil')->with('success', 'Las categorias y subcategorias de la tienda Lookfantastic han sido creadas correctamente.');
         }
         else{
-            return view('perfil')->with('error', 'Las categorias y subcategorias de la tienda Lookfantastic no se han podido crear correctamente.');
+            return redirect()->route('perfil')->with('danger', 'Las categorias y subcategorias de la tienda Lookfantastic no se han podido crear correctamente.');
         }
     }
 

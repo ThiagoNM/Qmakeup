@@ -36,16 +36,15 @@ class DruniCategoriaScrapingController extends Controller
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
         $crawler = $client->request('GET', $pageUrl);
         $this->extractCategoryFrom($crawler);
-        echo "Ya estan todos las categorias de Druni recogidos";
         $errors = $this->erros;
         if ($errors != null)
         {
-            echo "Ya estan todos las categorias de Druni recogidos, ya puedes volver a la pagina.";
-            return view('perfil')->with('success', 'Las categorias y subcategorias de la tienda Druni han sido creadas correctamente.');
+            return redirect()->route('perfil')->with('success', 'Las categorias y subcategorias de la tienda Druni han sido creados correctamente.');
         }
         else{
-            return view('perfil')->with('error', 'Las categorias y subcategorias de la tienda Druni no se han podido crear correctamente.');
+            return redirect()->route('perfil')->with('danger', 'Las categorias y subcategorias de la tienda Druni no se han podido crear correctamente.');
         }
+
     }
 
 
@@ -157,8 +156,13 @@ class DruniCategoriaScrapingController extends Controller
             array_push($errors, $msg);
             $this->errors = $errors;
         }
-
-       
+        if ($errors != null)
+        {
+            return view('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creadas correctamente.');
+        }
+        else{
+            return view('perfil')->with('error', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
+        }
 
     }
 
@@ -269,19 +273,14 @@ class DruniCategoriaScrapingController extends Controller
     
     public function crearCategoriaTienda($nombreCategoria, $ruta_categoria)
     {
-        try {
-            $id_tienda = $this->recogerIdTienda();
-            $id_categoria = $this->recogerIdCategoria($nombreCategoria);
-            CategoriaTienda::create([
-                'nombre' => $nombreCategoria,
-                'id_categoria' => $id_categoria,
-                'url_categoria' => $ruta_categoria,
-                'id_tienda' => $id_tienda
-            ]);
-        } catch (\Throwable $th) {
-            throw $th;
-        }
-
+        $id_tienda = $this->recogerIdTienda();
+        $id_categoria = $this->recogerIdCategoria($nombreCategoria);
+        CategoriaTienda::create([
+            'nombre' => $nombreCategoria,
+            'id_categoria' => $id_categoria,
+            'url_categoria' => $ruta_categoria,
+            'id_tienda' => $id_tienda
+        ]);
     }
     
     
@@ -307,7 +306,6 @@ class DruniCategoriaScrapingController extends Controller
         {
             $precio->delete();
         }
-        echo "<br>Precios eliminados.";
      }
  
      // Eliminar productos  
@@ -321,7 +319,6 @@ class DruniCategoriaScrapingController extends Controller
             {
                 $producto->delete();
             }
-            echo "<br>Producto eliminados.";
         }
      }
  

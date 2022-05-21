@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect('/');
+        return redirect('/')->with('success','Inicio de sesión correctamente');
     }
 
     /**
@@ -49,6 +49,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('success','Se cerro la sesion correctamente');
     }
 }

@@ -29,65 +29,75 @@ class DruniScrapingController extends Controller
     private $lastPage = 1;
     private $itemsXPage = 24;
 
-
-
     // RECOGER DATOS DE GASTOS DE ENVIO DE LA PÁGINA
     public function shippingCostData(Client $client)
     {
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
         $crawler = $client->request('GET', 'https://ayuda.druni.es/hc/es/articles/360012996559-Gastos-y-metodos-de-envio-');
         $this->extractShippingCostsFrom($crawler,);
-
     }
 
     public function extractShippingCostsFrom(Crawler $crawler)
     {
-       
-        // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
-        $inlineProductStyles = '"article-info"';
+        try {
+        
+            // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
+            $inlineProductStyles = '"article-info"';
 
-        // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
-        // con EACH iteramos cada nodo del objeto CRAWLER
-        $crawler->filter("[class=$inlineProductStyles]")->each(function($dataNode) {
-            // Filtramos el contenedor para recoger una información especifica
-            $divs = $dataNode->filter("[class='article-body']")->first();
-            // Gastos minimos 
-            $sonsDiv = $divs->children();
-            $pText = $sonsDiv->eq(1)->text();
-            $pUnclean = explode("a ", $pText);
-            $pUcleanArray = explode("€", $pUnclean[1]);
+            // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
+            // con EACH iteramos cada nodo del objeto CRAWLER
+            $crawler->filter("[class=$inlineProductStyles]")->each(function($dataNode) {
+                // Filtramos el contenedor para recoger una información especifica
+                $divs = $dataNode->filter("[class='article-body']")->first();
+                // Gastos minimos 
+                $sonsDiv = $divs->children();
+                $pText = $sonsDiv->eq(1)->text();
+                $pUnclean = explode("a ", $pText);
+                $pUcleanArray = explode("€", $pUnclean[1]);
 
-            $gastosMinimos =  intval($pUcleanArray[0]);
+                $gastosMinimos =  intval($pUcleanArray[0]);
 
-            // Para recoger los gastos de envio
-            $ulNode = $divs->children()->filter('ul');
-            $li = $ulNode->eq(0);
-            $segundoUlNode = $ulNode->children()->filter('ul');
-            $lis = $segundoUlNode->children()->filter('li');
+                // Para recoger los gastos de envio
+                $ulNode = $divs->children()->filter('ul');
+                $li = $ulNode->eq(0);
+                $segundoUlNode = $ulNode->children()->filter('ul');
+                $lis = $segundoUlNode->children()->filter('li');
 
-            // Gastos de envio en peninsula
-            $gastosPeninsulaText = $lis->eq(0)->text();
-            $gastosPeninsulaArray = explode(" ", $gastosPeninsulaText);
-            $gastosPeninsulaString = $gastosPeninsulaArray[1];
-            $gastosPeninsulaSymbol = str_replace('€','',$gastosPeninsulaString);
-            $gastosPeninsulaClean = str_replace(',','.',$gastosPeninsulaSymbol);
+                // Gastos de envio en peninsula
+                $gastosPeninsulaText = $lis->eq(0)->text();
+                $gastosPeninsulaArray = explode(" ", $gastosPeninsulaText);
+                $gastosPeninsulaString = $gastosPeninsulaArray[1];
+                $gastosPeninsulaSymbol = str_replace('€','',$gastosPeninsulaString);
+                $gastosPeninsulaClean = str_replace(',','.',$gastosPeninsulaSymbol);
 
-            $gastosPeninsula = floatval($gastosPeninsulaClean);
+                $gastosPeninsula = floatval($gastosPeninsulaClean);
 
-            // Gastos de envio en baleares
-            $gastosBalearesText = $lis->eq(1)->text();
-            $gastosBalearesArray = explode(" ", $gastosBalearesText);
-            $gastosBalearesString = $gastosBalearesArray[1];
-            $gastosBalearesSymbol = str_replace('€','',$gastosBalearesString);
-            $gastosBalearesClean = str_replace(',','.',$gastosBalearesSymbol);
-           
-            $gastosBaleares = floatval($gastosBalearesClean);
-            // Añadir en la base de datos la información sobre la tienda y la pagina web
-            $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
-            $this->crearPaginaExterna();
+                // Gastos de envio en baleares
+                $gastosBalearesText = $lis->eq(1)->text();
+                $gastosBalearesArray = explode(" ", $gastosBalearesText);
+                $gastosBalearesString = $gastosBalearesArray[1];
+                $gastosBalearesSymbol = str_replace('€','',$gastosBalearesString);
+                $gastosBalearesClean = str_replace(',','.',$gastosBalearesSymbol);
+            
+                $gastosBaleares = floatval($gastosBalearesClean);
+                // Añadir en la base de datos la información sobre la tienda y la pagina web
+                $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
+                $this->crearPaginaExterna();
 
-        }); 
-
+            }); 
+        } catch (Exception $e) {
+            $errors = $this->errors;
+            $msg = $e->getMessage();
+            array_push($errors, $msg);
+            $this->errors = $errors;
+        }
+        if ($errors != null)
+        {
+            return redirect()->route('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creados correctamente.');
+        }
+        else{
+            return redirect()->route('perfil')->with('danger', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
+        }
     }
 
 
@@ -139,20 +149,15 @@ class DruniScrapingController extends Controller
             $ultPagina = $limiteArt / $articulosXPagina;
             $ultPagina = intval(ceil($ultPagina));
             $this->lastPage = $ultPagina;
-            echo "<br>Limite de pagina recogido.";
             $this->extractProductsFrom($crawler, $client);
         }
-        echo "Ya estan todos los productos de Druni recogidos";
-        echo "<h2>Errors:</h2>";
-        foreach($errors as $msg) {
-            echo "<pre>{$msg}</pre>";
-        }
+        $errors = $this->errors; 
         if ($errors != null)
         {
-            return view('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creadas correctamente.');
+            return redirect()->route('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creadas correctamente.');
         }
         else{
-            return view('perfil')->with('error', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
+            return redirect()->route('perfil')->with('danger', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
         }
 
     }
@@ -173,7 +178,6 @@ class DruniScrapingController extends Controller
             $this->id_subcategoria = $this->recogerIdSubcategoria();
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             $crawler = $client->request('GET', $pageUrl);
-            echo "<br>URL: " . $pageUrl;
             // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
             // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
             $inlineProductStyles = '"item product product-item"';
@@ -210,9 +214,7 @@ class DruniScrapingController extends Controller
                     $precio = floatval($precioFormat);
                     
                     try {
-                        echo "<br>Precio:" . $precio;
                         $this->crearMarca($marca);
-                        echo "<br> Nombre producto: " . $nombreProducto;
                         $this->crearProducto($img , $nombreProducto, $marca , $descripcion);
                     
                         // Recoger id producto
@@ -228,7 +230,6 @@ class DruniScrapingController extends Controller
                 }
             }); 
         }
-        echo "Terminado";
     }
 
 
@@ -316,20 +317,14 @@ class DruniScrapingController extends Controller
     // Crear producto 
     public function crearMarca($marca)
     {
-        try {
-            $ExisteMarca = Marca::where("marca", $marca)->exists();
-            if (!$ExisteMarca)
-            {
-                $marca = strtoupper($marca);
-                Marca::create([
-                    'marca' => $marca,
-                ]);
-                echo "<br>Marca creada.";
-            }
-        } catch (\Throwable $th) {
-            throw $th;
+        $ExisteMarca = Marca::where("marca", $marca)->exists();
+        if (!$ExisteMarca)
+        {
+            $marca = strtoupper($marca);
+            Marca::create([
+                'marca' => $marca,
+            ]);
         }
-
     }
 
     // IdMarca
@@ -356,8 +351,6 @@ class DruniScrapingController extends Controller
             'valoracion'=> $valoracion,
             'id_tienda'=> $id_tienda
         ]);
-        echo "<br>Producto creado.";
-        
     }
 
     // Crear precios 
@@ -375,36 +368,25 @@ class DruniScrapingController extends Controller
     // Eliminar precios  
     public function eliminarPrecios ()
     {
-        try {
-            $id_tienda = $this->recogerIdTienda();
-            $precios = Precio::all();
-            foreach($precios as $precio)
-            {
-                $precio->delete();
-            }
-            echo "<br>Precios eliminados.";
-        } catch (\Throwable $th) {
-            throw $th;
+        $id_tienda = $this->recogerIdTienda();
+        $precios = Precio::all();
+        foreach($precios as $precio)
+        {
+            $precio->delete();
         }
     }
 
     // Eliminar productos  
     public function eliminarProductos ()
     {
-        try {
-            $id_tienda = $this->recogerIdTienda();
-            $productos = Producto::all()->where("id_tienda", $id_tienda);
-            if($productos->count()>0)
+        $id_tienda = $this->recogerIdTienda();
+        $productos = Producto::all()->where("id_tienda", $id_tienda);
+        if($productos->count()>0)
+        {
+            foreach($productos as $producto)
             {
-                foreach($productos as $producto)
-                {
-                    $producto->delete();
-                }
-                echo "<br>Producto eliminados.";
+                $producto->delete();
             }
-            
-        } catch (\Throwable $th) {
-            throw $th;
         }
     }
 

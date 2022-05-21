@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Link para iconos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <!-- Link para los iconos de la valoracion -->
     <!-- Link para el style -->
     <link href="{{ asset('css/home.css') }}" rel="stylesheet">
 
@@ -35,7 +36,6 @@
                   </li>
                 </ul>
 
-
                 @if(Auth::user()!=null)
                   <a class="icono icono--navbar" type="button" href="{{ route('perfil') }}"><i class="bi bi-person"></i></a>
                   <form method="POST" action="{{ route('logout') }}" class="form--navbar">
@@ -57,16 +57,19 @@
           </nav>
   </header>
   <div class="principal">
+    @include('flash')
+
     @yield('content')
   </div>
 
   <footer>
       <label class="labelFooter ">555 55 55 55</label>
-      <a class="icono icono--footer" type="button" href="#"><i class="bi bi-instagram"></i></a>
+      <a class="icono icono--footer" type="button" href="https://www.instagram.com/"><i class="bi bi-instagram"></i></a>
       <label class="text labelFooter ">qmakeup@gmail.com</label>
   </footer>
 
   <!-- Script para funciones -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/ae5bc7e69c.js" crossorigin="anonymous"></script>
 </body>
 </html>
