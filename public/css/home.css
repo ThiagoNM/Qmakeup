@@ -254,6 +254,7 @@ body{
 
 .alphabet__brand{
     color:white;
+    text-decoration: none;
 }
 
 .container__form{
@@ -531,7 +532,10 @@ footer{
     width: 20%;
 }
 
-
+.boton--valorar{
+    font-size:1vw;
+    border-radius: 15px;
+}
 
 /* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MÓVIL~~~~~~~~~~~~ */
 @media (max-width: 600px) {

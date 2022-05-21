@@ -33,9 +33,9 @@ class RatingController extends Controller
                 ]); 
             }
             
-            return redirect()->back()->with('status', 'Gracias por valorar nuestro producto');
+            return redirect()->back()->with('success', 'Gracias por valorar nuestro producto');
         }else{
-            return redirect()->back()->with('status', 'Error');
+            return redirect()->back()->with('danger', 'Error');
 
         }
     }

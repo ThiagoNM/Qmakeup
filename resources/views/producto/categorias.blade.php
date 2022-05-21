@@ -8,7 +8,7 @@
       @foreach($categorias as $categoria)
 
         <div class="dropdown">
-          <button type="button" class="dropdown-toggle boton--nav" data-bs-toggle="dropdown">
+          <button type="button" class="dropdown-toggle boton__nav" data-bs-toggle="dropdown">
             {{ucfirst($categoria->nombre)}}
           </button>
           <ul class="dropdown-menu">
@@ -27,14 +27,13 @@
 
 
     <!-- HERRAMIENTA DE BUSQUEDA -->
-    <form >
-      <div class="input-group">
-        <input class="form-control" type="search" placeholder="Search" id="find" name="find" aria-label="Search">
-        <div class="input-group-append">
-          <button class="btn boton--search" type="submit"><i class="bi bi-search"></i></button>
-        </div>
-      </div>
-    <form> 
+    @if(strpos(Request::url(), '/subcate/'))
+    @else
+      <form class="container__search container__search--category">
+            <input class="form-control input__search" type="search" placeholder="Search" id="find" name="find" name="search" aria-label="Search">
+            <button class="btn boton--search" type="submit"><i class="bi bi-search"></i></button>
+      </form>
+    @endif
 
       <!-- CONTENEDOR PARA CENTRAR -->
     <div class="container__king container__king--category" >

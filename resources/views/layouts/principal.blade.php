@@ -36,7 +36,6 @@
                   </li>
                 </ul>
 
-
                 @if(Auth::user()!=null)
                   <a class="icono icono--navbar" type="button" href="{{ route('perfil') }}"><i class="bi bi-person"></i></a>
                   <form method="POST" action="{{ route('logout') }}" class="form--navbar">
@@ -58,6 +57,8 @@
           </nav>
   </header>
   <div class="principal">
+    @include('flash')
+
     @yield('content')
   </div>
 

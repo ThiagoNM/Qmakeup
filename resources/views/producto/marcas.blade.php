@@ -4,22 +4,20 @@
   <div class="container__global--brands">
 
     <!-- HERRAMIENTA DE BUSQUEDA -->
-    <form>
-      <div class="input-group margin-top">
-        <input class="form-control" type="search" placeholder="Search" id="search" name="search" aria-label="Search">
-        <div class="input-group-append">
-            <button class="btn boton--search " type="submit"><i class="bi bi-search"></i>
-            </button>
-        </div>
-      </div>
-    </form>  
+    @if(strpos(Request::url(), '/filtro/'))
+    @else
+      <form class="container__search container__search--category">
+            <input class="form-control input__search" type="search" placeholder="Search" id="search" name="search" aria-label="Search">
+            <button class="btn boton--search" type="submit"><i class="bi bi-search"></i></button>
+      </form>
+    @endif
 
       <!-- CONTENEDOR PARA CENTRAR -->
     <div class="container__king container__king--brands" >
         <div class="container__alphabet">
         <form action="{{route('marcas')}}">
           @foreach ($marcas as $marca)
-            <a class="alphabet__brand" id="filtro" href="{{ route('find', $marca->id)}}">{{ $marca->marca}}</a>
+            <p><a class="alphabet__brand" id="filtro" href="{{ route('find', $marca->id)}}">{{ $marca->marca}}</a></p>
           @endforeach
         </form>
       </div>

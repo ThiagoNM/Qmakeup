@@ -113,8 +113,7 @@ class ProductoController extends Controller
      */
     public function top(Request $request)
     {
-        $productos = Producto::orderBy("valoracion", 'asc')->get();
-
+        $productos = Producto::orderBy("valoracion_media", 'desc')->where('valoracion_media', '>' ,3)->get();
         return view("home", [
             "productos" => $productos
         ]);
@@ -153,7 +152,7 @@ class ProductoController extends Controller
         $precioBarato = min( $listaPrecios);
 
         // Informacion del producto más barato
-        $precio = Precio::all()->where('precio',$precioBarato)->first();
+        $precio = Precio::all()->where('precio',$precioBarato)->where("id_producto", $id)->first();
         $id_tiendaBarata = $precio->id_tienda;
         $tienda = Tienda::all()->where('id', $id_tiendaBarata)->first();
         $producto = Producto::all()->where("id",$id )->first();
@@ -162,32 +161,58 @@ class ProductoController extends Controller
         $tiendas = Tienda::all();
         $pagina_externa = PaginaExterna::all();
         /* Valoracion */ 
-        $ratings = Rating::where('id_producto',$producto->id)->get();
-        $rating_sum = Rating::where('id_producto',$producto->id)->sum('stars_rated');
-        $user_rating = Rating::where('id_producto',$producto->id)->where('id_usuario', \Auth::user()->id)->first();
-
         
-        if($ratings->count() > 0)
-        {
-            $rating_value = $rating_sum/$ratings->count();
-            $producto->UpdateOrFail([
-                "valoracion_media" => $rating_value
-            ]);
-            
-        } else {
-            $rating_value = 0;
-        }
         $listaDeseo = Lista_de_deseo::all();
+        if(\Auth::user()){
+            $ratings = Rating::where('id_producto',$producto->id)->get();
+            $rating_sum = Rating::where('id_producto',$producto->id)->sum('stars_rated');
+            $user_rating = Rating::where('id_producto',$producto->id)->where('id_usuario', \Auth::user()->id)->first();
+
+            
+            if($ratings->count() > 0)
+            {
+                $rating_value = $rating_sum/$ratings->count();
+                $producto->UpdateOrFail([
+                    "valoracion_media" => $rating_value
+                ]);
+                
+            } else {
+                $rating_value = 0;
+            }
+            return view("producto.show", [
+                'producto' =>$producto,
+                'precio' =>$precio,
+                'precios'=>$precios,
+                'tienda' =>$tienda,
+                'tiendas' =>$tiendas,
+                'pagina_e' =>$pagina_externa,
+                'listaDeseo' => $listaDeseo
+            ], compact('ratings','rating_value','user_rating'));    
+        } else{
+            $ratings = Rating::where('id_producto',$producto->id)->get();
+            $rating_sum = Rating::where('id_producto',$producto->id)->sum('stars_rated');
+
+            if($ratings->count() > 0)
+            {
+                $rating_value = $rating_sum/$ratings->count();
+                $producto->UpdateOrFail([
+                    "valoracion_media" => $rating_value
+                ]);
+                
+            } else {
+                $rating_value = 0;
+            }
+            return view("producto.show", [
+                'producto' =>$producto,
+                'precio' =>$precio,
+                'precios'=>$precios,
+                'tienda' =>$tienda,
+                'tiendas' =>$tiendas,
+                'pagina_e' =>$pagina_externa,
+                'listaDeseo' => $listaDeseo
+            ],compact('ratings','rating_value'));
+        }
         
-        return view("producto.show", [
-            'producto' =>$producto,
-            'precio' =>$precio,
-            'precios'=>$precios,
-            'tienda' =>$tienda,
-            'tiendas' =>$tiendas,
-            'pagina_e' =>$pagina_externa,
-            'listaDeseo' => $listaDeseo
-        ], compact('ratings','rating_value','user_rating'));
     }
 
     /**

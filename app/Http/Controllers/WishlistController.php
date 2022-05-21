@@ -24,7 +24,7 @@ class WishlistController extends Controller
             }
             
         }
-      
+        
         if($existe == false){
             $ok = Lista_de_deseo::create([
                 'id_producto' => $producto,
