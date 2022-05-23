@@ -150,15 +150,6 @@ class DruniCategoriaScrapingController extends Controller
             array_push($errors, $msg);
             $this->errors = $errors;
         }
-        $errors = $this->errors;
-        if ($errors == [])
-        {
-            return view('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creadas correctamente.');
-        }
-        else{
-            return view('perfil')->with('error', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
-        }
-
     }
 
 

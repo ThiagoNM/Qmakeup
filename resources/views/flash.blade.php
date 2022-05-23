@@ -3,8 +3,8 @@
     @include('flash-message', ['type' => "success", 'message' => $message])
     @endif
     
-    @if ($message = Session::get('error'))
-    @include('flash-message', ['type' => "error", 'message' => $message])
+    @if ($message = Session::get('danger'))
+    @include('flash-message', ['type' => "danger", 'message' => $message])
     @endif
     
     @if ($message = Session::get('warning'))

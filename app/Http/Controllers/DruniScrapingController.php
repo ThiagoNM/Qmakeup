@@ -36,14 +36,13 @@ class DruniScrapingController extends Controller
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
         $crawler = $client->request('GET', 'https://ayuda.druni.es/hc/es/articles/360012996559-Gastos-y-metodos-de-envio-');
         $this->extractShippingCostsFrom($crawler);
-        echo "<br>Prueba";
         $errors = $this->errors;
         if ($errors == [])
         {
-            return redirect()->route('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creados correctamente.');
+            return redirect()->route('perfil')->with('success', 'La tienda Druni ha sido creada correctamente.');
         }
         else{
-            return redirect()->route('perfil')->with('danger', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
+            return redirect()->route('perfil')->with('danger', 'La tienda Druni no se ha podido crear correctamente.');
         }
     }
 
@@ -52,12 +51,9 @@ class DruniScrapingController extends Controller
         try {
             // Filtrar todos los elementos que contengan como clase que que contega la variable $inlineContactStyles
             $inlineProductStyles = '"article-info"';
-            echo "<br>Entramos en la funcion";
             // Filtramos el objeto CRAWLER para obtener el contenedor con toda la información
             // con EACH iteramos cada nodo del objeto CRAWLER
-            $crawler->filter("[class=$inlineProductStyles]")->each(function($dataNode) {
-                echo "<br>Dentro del crawler";
-
+            $entraCrawler = $crawler->filter("[class=$inlineProductStyles]")->each(function($dataNode) {
                 // Filtramos el contenedor para recoger una información especifica
                 $divs = $dataNode->filter("[class='article-body']")->first();
                 // Gastos minimos 
@@ -92,12 +88,16 @@ class DruniScrapingController extends Controller
             
                 $gastosBaleares = floatval($gastosBalearesClean);
                 // Añadir en la base de datos la información sobre la tienda y la pagina web
-                echo "<br>CreamosTienda";
                 $this->crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos );
-                echo "<br>CreamosPagina";
                 $this->crearPaginaExterna();
-
+                return True;
             }); 
+            if (!$entraCrawler)
+            {
+                $errors = $this->errors;
+                array_push($errors, "No entra en el crawler.");
+                $this->errors = $errors;
+            }
         } catch (Exception $e) {
             $errors = $this->errors;
             $msg = $e->getMessage();
@@ -105,7 +105,6 @@ class DruniScrapingController extends Controller
             $this->errors = $errors;
         }
         
-        echo "<br>Terminamos y redirigimos";
     }
 
 
@@ -146,14 +145,13 @@ class DruniScrapingController extends Controller
             $this->extractProductsFrom($crawler, $client);
         }
         // Termina
-        echo "<br> TERMINADO !";
         $errors = $this->errors; 
         if ($errors == [])
         {
-            return redirect()->route('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creadas correctamente.');
+            return redirect()->route('perfil')->with('success', 'Los productos y precios de Druni han sido creados correctamente.');
         }
         else{
-            return redirect()->route('perfil')->with('danger', 'Los productos y precios de la tienda Druni no se han podido crear correctamente.');
+            return redirect()->route('perfil')->with('danger', 'Los productos y precios de Druni no se han creado correctamente.');
         }
 
     }
@@ -230,7 +228,6 @@ class DruniScrapingController extends Controller
                 }
             }); 
         }
-        echo "terminado";
     }
 
 
@@ -355,7 +352,6 @@ class DruniScrapingController extends Controller
     // Crear producto 
     public function crearProducto($img , $nombreProducto , $marca, $descripcion)
     {
-        echo "Creando producto";
         $id_tienda = $this->recogerIdTienda();
         $id_marca = $this->recogerIdMarca($marca);
         $id_subcategoria = $this->id_subcategoria;

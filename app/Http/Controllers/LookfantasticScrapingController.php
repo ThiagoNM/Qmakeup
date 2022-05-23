@@ -38,10 +38,8 @@ class LookfantasticScrapingController extends Controller
             $this->urlSubcategoria = $urlSubcategoria;
             $url = "$urlSubcategoria";
             $crawler = $client->request('GET', $url);
-            echo "<br>URL" . $url ;
             
             $lastPage = $this->extractlastPage($crawler);
-            echo $lastPage[0] ;
             for ($i = 1; $i<=$lastPage[0]; $i++)
             {
                 $pageUrl = $url . "?pageNumber={$i}";
@@ -118,7 +116,6 @@ class LookfantasticScrapingController extends Controller
                                 $precio = floatval($precioFormat);
 
                                 $this->crearPrecios($id_producto, $precio);
-                                echo "<br> Precio creado" . $id_producto;
                             } 
                         }
                     }
@@ -154,7 +151,15 @@ class LookfantasticScrapingController extends Controller
     {
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
         $crawler = $client->request('GET', 'https://www.lookfantastic.es/info/delivery-information.list');
-        $this->extractShippingCostsFrom($crawler,);
+        $this->extractShippingCostsFrom($crawler);
+        $errors = $this->errors;
+        if ($errors == [])
+        {
+            return redirect()->route('perfil')->with('success', 'La tienda Lookfantastic ha sido creada correctamente.');
+        }
+        else{
+            return redirect()->route('perfil')->with('danger', 'La tienda Lookfantastic no se ha creado correctamente.');
+        }
     }
 
     // Recogemos la información sobre los gastos de envio
@@ -206,14 +211,6 @@ class LookfantasticScrapingController extends Controller
             $msg = $e->getMessage();
             array_push($errors, $msg);
             $this->errors = $errors;
-        }
-        $errors = $this->errors;
-        if ($errors == [])
-        {
-            return redirect()->route('perfil')->with('success', 'La tienda Lookfantastic ha sido creada correctamente.');
-        }
-        else{
-            return redirect()->route('perfil')->with('danger', 'La tienda Lookfantastic no se ha creado correctamente.');
         }
     }
 
