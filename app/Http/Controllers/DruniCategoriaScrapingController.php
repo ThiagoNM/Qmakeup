@@ -25,19 +25,13 @@ class DruniCategoriaScrapingController extends Controller
     
     public function category(Client $client)
     {
-        $this->eliminarPrecios();
-        $this->eliminarProductos();
-        
-        $this->eliminarCategoriasTienda();
-        $this->eliminarSubcategoriasTienda();
-
         $pageUrl = $this->pageUrl;
 
         // Hacemos una peticion a la página y nos devuebe un objetp CRAWLER para analizar el contenido de la página web
         $crawler = $client->request('GET', $pageUrl);
         $this->extractCategoryFrom($crawler);
-        $errors = $this->erros;
-        if ($errors != null)
+        $errors = $this->errors;
+        if ($errors == [])
         {
             return redirect()->route('perfil')->with('success', 'Las categorias y subcategorias de la tienda Druni han sido creados correctamente.');
         }
@@ -156,7 +150,8 @@ class DruniCategoriaScrapingController extends Controller
             array_push($errors, $msg);
             $this->errors = $errors;
         }
-        if ($errors != null)
+        $errors = $this->errors;
+        if ($errors == [])
         {
             return view('perfil')->with('success', 'Los productos y precios de la tienda Druni han sido creadas correctamente.');
         }
@@ -243,44 +238,23 @@ class DruniCategoriaScrapingController extends Controller
             }
         }
     }
-    // Eliminar Categorias  
-    public function eliminarCategoriasTienda()
-    {
-        $id_tienda = $this->recogerIdTienda();
-        $categoriasTienda = CategoriaTienda::all()->where("id_tienda", $id_tienda);
-        if($categoriasTienda->count()>0)
-        {
-            foreach($categoriasTienda as $categoriaTienda)
-            {
-                $categoriaTienda->delete();
-            }
-        }
-    }
-
-    // Eliminar Subcategorias  
-    public function eliminarSubcategoriasTienda()
-    {
-        $id_tienda = $this->recogerIdTienda();
-        $subcategoriasTienda = SubcategoriaTienda::all()->where("id_tienda", $id_tienda);
-        if($subcategoriasTienda->count()>0)
-        {
-            foreach($subcategoriasTienda as $subcategoriaTienda)
-            {
-                $subcategoriaTienda->delete();
-            }
-        }
-    }
     
     public function crearCategoriaTienda($nombreCategoria, $ruta_categoria)
     {
         $id_tienda = $this->recogerIdTienda();
         $id_categoria = $this->recogerIdCategoria($nombreCategoria);
-        CategoriaTienda::create([
-            'nombre' => $nombreCategoria,
-            'id_categoria' => $id_categoria,
-            'url_categoria' => $ruta_categoria,
-            'id_tienda' => $id_tienda
-        ]);
+
+        $existeCategoria = CategoriaTienda::where("nombre", $nombreCategoria)->where("id_tienda", $id_tienda)->exists();
+        if (!$existeCategoria){
+            CategoriaTienda::create([
+                'nombre' => $nombreCategoria,
+                'id_categoria' => $id_categoria,
+                'url_categoria' => $ruta_categoria,
+                'id_tienda' => $id_tienda
+            ]);
+        }else{
+            CategoriaTienda::where("nombre", $nombreCategoria)->where("id_tienda", $id_tienda)->update(["url_categoria" => $ruta_categoria]);
+        }
     }
     
     
@@ -288,38 +262,16 @@ class DruniCategoriaScrapingController extends Controller
     {
         $id_subcategoria = $this->recogerIdSubcategoria($nombreCategoriaYSubcategoria);
         $id_tienda = $this->recogerIdTienda();
-        SubcategoriaTienda::create([
-            'nombre' => $nombreCategoriaYSubcategoria,
-            'id_subcategoria' => $id_subcategoria,
-            'url_subcategoria' => $ruta_subcategoria,
-            'id_tienda' => $id_tienda
-        ]);
-        return "Hola";
+        $existeSubcategoria = SubcategoriaTienda::where("nombre", $nombreCategoriaYSubcategoria)->where("id_tienda", $id_tienda)->exists();
+        if (!$existeSubcategoria){
+            SubcategoriaTienda::create([
+                'nombre' => $nombreCategoriaYSubcategoria,
+                'id_subcategoria' => $id_subcategoria,
+                'url_subcategoria' => $ruta_subcategoria,
+                'id_tienda' => $id_tienda
+            ]);
+        }else{
+            SubcategoriaTienda::where("nombre", $nombreCategoriaYSubcategoria)->where("id_tienda", $id_tienda)->update(["url_subcategoria" => $ruta_subcategoria]);
+        }
     }
-
-     // Eliminar precios  
-     public function eliminarPrecios ()
-     {
-        $id_tienda = $this->recogerIdTienda();
-        $precios = Precio::all();
-        foreach($precios as $precio)
-        {
-            $precio->delete();
-        }
-     }
- 
-     // Eliminar productos  
-     public function eliminarProductos ()
-     {
-        $id_tienda = $this->recogerIdTienda();
-        $productos = Producto::all()->where("id_tienda", $id_tienda);
-        if($productos->count()>0)
-        {
-            foreach($productos as $producto)
-            {
-                $producto->delete();
-            }
-        }
-     }
- 
 }

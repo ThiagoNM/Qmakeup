@@ -39,8 +39,8 @@
     <div class="container__king container__king--category" >
 
       <!-- PRODUCTOS -->
-      <div class="container container--brands">
-      @php($cont = 0)
+      <div class="container container--category">
+        @php($cont = 0)
         @foreach ($productos as $producto)
         <div class="container__product">
           <a class="link__product" href="{{ route('productoShow.show', $producto, $producto)}}">
@@ -63,6 +63,9 @@
         @php($cont++)
         @endforeach
       </div> 
-      {{ $productos->appends(request()->input())->links()}}
+      <div class="container__paginador">
+        {{ $productos->appends(request()->input())->links()}}
+      </div> 
     </div> 
+
 @endsection

@@ -141,7 +141,9 @@ class ProductoController extends Controller
      */
     public function show(Producto $producto, $id)
     {
+        // Ordenar por precio más barato a más carp
         $precios = Precio::orderBy("precio", 'asc')->get();
+        // Recoger el precio más barato
         $precios = $precios->where("id_producto", $id);
         $listaPrecios = array();
         $listaId = [];

@@ -232,6 +232,7 @@ body{
 
 .container--category{
     background-color: transparent;
+    margin-bottom: 2%;
 }
 
 .container--brands{
@@ -254,6 +255,7 @@ body{
     flex-direction: row;
     margin-top: 2%;
     width: 100%;
+    max-height: 1150px;
     margin-bottom: 5%;
 }
 
@@ -264,13 +266,13 @@ body{
     padding: 2%;
     border-radius: 5px;
     overflow-y: scroll;
-    max-height: 1800px;
-    height: 100%;
+    max-height: 100%;
 }
 
 .container__paginador
 {
-    margin: auto;
+    display: flex;
+    justify-content: center;
 }
 
 .alphabet__brand{
@@ -516,7 +518,6 @@ footer{
 }
 .text--attention{
     font-size: 1.5vw;
-    margin-top: 4%;
     font-weight: bold;
     text-align: center;
 }
@@ -584,17 +585,27 @@ footer{
         background-color: #272727;
     }
 
+    .container--brands{
+        height: 100%;
+    }
+
+    .container__king--brands{
+        min-height: 3950px;
+    }
+
+    .container__search{
+        width: 50%;
+    }
+
     .container__form{
         width: 100%;
     }
-
 
     .container__product--details{
         display: flex;
         flex-wrap: wrap;
         width: 100%;
     }
-
 
     .container__starsProduct{
         font-size: 5vw;
@@ -611,6 +622,10 @@ footer{
 
     .container__price p{
         font-size: 5vw;
+    }
+
+    .continer__business img{
+        width: 50%;
     }
 
     .tabla__precios{
@@ -640,6 +655,10 @@ footer{
         font-size: 4vw;
     }
 
+    .icono--footer{
+        margin-top: 1%;
+        font-size: 5vw;
+    }
     /* Textos */
     .title{
         font-size: 10vw;
@@ -670,9 +689,7 @@ footer{
     }
 
     /* Imagenes */
-    .continer__business img{
-        width: 50%;
-    }
+
 
     .img__product--details{
         width: 80%;
@@ -695,6 +712,30 @@ footer{
     .icon--whislist{
         font-size: 10vw;
     }
+
+    /* Admininistador */
+
+    .boton--admin{
+        font-size: 4vw;
+    }
+
+    .container__king--admin{
+        flex-wrap:wrap;
+    }
+
+    .container__admin{
+        width: 100%;        
+    }
+    .title__admin{
+        font-size: 5vw;
+    }
+    .text__admin{
+        font-size: 4vw;
+    }
+    .text--attention{
+        font-size: 4vw;
+    }
+
 }
 
 /* ~~~~~~~~~~~~ RESPOSIVE VERSIÓN MEDIA PANTALLA~~~~~~~~~~~~ */

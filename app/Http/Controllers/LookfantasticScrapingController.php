@@ -30,8 +30,6 @@ class LookfantasticScrapingController extends Controller
     public function productsCategory(Client $client)
     {
         set_time_limit(7200);
-            // Eliminamos los precios anteriores para subir a la base de datos los precios actuales
-            $this->EliminarPrecios();
 
         $subcategorias = $this->recogerSubcategoriaTienda();
         foreach ($subcategorias as $subcategoria) {
@@ -40,8 +38,10 @@ class LookfantasticScrapingController extends Controller
             $this->urlSubcategoria = $urlSubcategoria;
             $url = "$urlSubcategoria";
             $crawler = $client->request('GET', $url);
-
+            echo "<br>URL" . $url ;
+            
             $lastPage = $this->extractlastPage($crawler);
+            echo $lastPage[0] ;
             for ($i = 1; $i<=$lastPage[0]; $i++)
             {
                 $pageUrl = $url . "?pageNumber={$i}";
@@ -52,7 +52,7 @@ class LookfantasticScrapingController extends Controller
             }
         }
         $errors = $this->errors;
-        if ($errors != null)
+        if ($errors == [])
         {
             return redirect()->route('perfil')->with('success', 'Los precios de la tienda Lookfantastic han sido creadas correctamente.');
         }
@@ -118,6 +118,7 @@ class LookfantasticScrapingController extends Controller
                                 $precio = floatval($precioFormat);
 
                                 $this->crearPrecios($id_producto, $precio);
+                                echo "<br> Precio creado" . $id_producto;
                             } 
                         }
                     }
@@ -206,6 +207,14 @@ class LookfantasticScrapingController extends Controller
             array_push($errors, $msg);
             $this->errors = $errors;
         }
+        $errors = $this->errors;
+        if ($errors == [])
+        {
+            return redirect()->route('perfil')->with('success', 'La tienda Lookfantastic ha sido creada correctamente.');
+        }
+        else{
+            return redirect()->route('perfil')->with('danger', 'La tienda Lookfantastic no se ha creado correctamente.');
+        }
     }
 
     public function comprovarMarca($marcaProducto)
@@ -268,14 +277,23 @@ class LookfantasticScrapingController extends Controller
     // Crear tienda
     public function crearTienda($gastosPeninsula, $gastosBaleares, $gastosMinimos )
     {
-        $this->EliminarTienda();
         $nombreTienda = $this->nombreTienda;
-        $createDB = Tienda::create([
-            "nombre" => $nombreTienda,
-            "gastos_peninsula" => $gastosPeninsula,
-            "gastos_baleares" => $gastosBaleares,
-            'gastos_minimos' => $gastosMinimos,
-        ]);
+        $existeTienda = Tienda::where("nombre", $nombreTienda)->exists();
+        if(!$existeTienda){
+            $createDB = Tienda::create([
+                "nombre" => $nombreTienda,
+                "gastos_peninsula" => $gastosPeninsula,
+                "gastos_baleares" => $gastosBaleares,
+                'gastos_minimos' => $gastosMinimos,
+            ]);
+        }else{
+            Tienda::where("nombre", $nombreTienda)
+                    ->update([ 
+                        "gastos_peninsula" => $gastosPeninsula ,
+                        "gastos_baleares" => $gastosBaleares, 
+                        "gastos_minimos" => $gastosMinimos
+                    ]);
+        }
     }
 
     // Crear pagina externa 
@@ -286,11 +304,18 @@ class LookfantasticScrapingController extends Controller
         //Url de la tienda
         $id_tienda = $this->recogerIdTienda();
 
-
-        $createDB = PaginaExterna::create([
-            "url" => $url,
-            "id_tienda" => $id_tienda,
-        ]);
+        $existePaginaExterna = PaginaExterna::where("id_tienda", $id_tienda)->exists();
+        if(!$existePaginaExterna){
+            $createDB = PaginaExterna::create([
+                "url" => $url,
+                "id_tienda" => $id_tienda,
+            ]);
+        }else{
+            PaginaExterna::where("id_tienda", $id_tienda)
+                        ->update([ 
+                            "url" => $url
+                        ]);
+        }
     }
 
     // Guardar en la base de datos el precio
@@ -298,82 +323,20 @@ class LookfantasticScrapingController extends Controller
     {
         $id_tienda = $this->recogerIdTienda();
         $url_producto = $this->url_producto;
-        
-        $createDB = Precio::create([
-            "id_producto" => $id_producto,
-            'id_tienda'=> $id_tienda,
-            "precio" => $precio,
-            "url_producto" => $url_producto
-        ]);
-    }
-    // Eliminar precios  
-    public function EliminarPrecios ()
-    {
-        $id_tienda = $this->recogerIdTienda();
-        $precios = Precio::all()->where("id_tienda", $id_tienda);
-        foreach($precios as $precio)
-        {
-            $precio->delete();
-        }
-    }
-
-    // Eliminar pagina externa  
-    public function EliminarPaginaExterna ()
-    {
-        $id_tienda = $this->recogerIdTienda();
-        $paginaExternas = PaginaExterna::all()->where("id_tienda", $id_tienda);
-        if($paginaExternas->count()>0)
-        {
-            foreach($paginaExternas as $paginaExterna)
-            {
-                $paginaExterna->delete();
-            }
-        }
-    }
-
-    // Eliminar tienda  
-    public function EliminarTienda ()
-    {
-        $this->EliminarPrecios();
-        $this->EliminarSubcategoriasTienda();
-        $this->EliminarCategoriasTienda();
-        $this->EliminarPaginaExterna();
-        $id_tienda = $this->recogerIdTienda();
-        $tiendas = Tienda::all()->where("id", $id_tienda);
-        if($tiendas->count()>0)
-        {
-            foreach($tiendas as $tienda)
-            {
-                $tienda->delete();
-            }
-        }
-    }
-
-    // Eliminar Categorias  
-    public function EliminarCategoriasTienda()
-    {
-        $id_tienda = $this->recogerIdTienda();
-        $categoriasTienda = CategoriaTienda::all()->where("id_tienda", $id_tienda);
-        if($categoriasTienda->count()>0)
-        {
-            foreach($categoriasTienda as $categoriaTienda)
-            {
-                $categoriaTienda->delete();
-            }
-        }
-    }
-    
-    // Eliminar Subcategorias  
-    public function EliminarSubcategoriasTienda()
-    {
-        $id_tienda = $this->recogerIdTienda();
-        $subcategoriasTienda = SubcategoriaTienda::all()->where("id_tienda", $id_tienda);
-        if($subcategoriasTienda->count()>0)
-        {
-            foreach($subcategoriasTienda as $subcategoriaTienda)
-            {
-                $subcategoriaTienda->delete();
-            }
+        $existePrecio = Precio::where("id_producto", $id_producto)->where("id_tienda",$id_tienda)->exists();
+        if(!$existePrecio){
+            $createDB = Precio::create([
+                "id_producto" => $id_producto,
+                'id_tienda'=> $id_tienda,
+                "precio" => $precio,
+                "url_producto" => $url_producto
+            ]);
+        }else{
+            Precio::where("id_producto", $id_producto)->where("id_tienda",$id_tienda)
+                    ->update([ 
+                        "precio" => $precio,
+                        "url_producto" => $url_producto
+                    ]);
         }
     }
 }

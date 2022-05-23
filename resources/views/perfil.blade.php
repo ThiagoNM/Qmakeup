@@ -21,7 +21,6 @@
     @endif
 
     @if( Auth::user()->id_rol == 2)
-    <p class="text--attention">  <i class="bi bi-exclamation-triangle-fill"></i> Tenga cuidado con los botones <i class="bi bi-exclamation-triangle-fill"></i></p>
     <div class="container__king--admin">
       <div class="container__admin">
         <p class="title__admin">TIENDA DRUNI</p>
@@ -29,7 +28,7 @@
           @csrf
           @method('GET')
           <div class="container__options">
-            <label class="text__admin">Añadir tienda</label>
+            <label class="text__admin">Añadir/Actualizar tienda</label>
             <button type="submit" class="boton boton--admin">Añadir</button>
           </div>
         </form>
@@ -38,7 +37,7 @@
           @csrf
           @method('GET')
           <div class="container__options">
-            <label class="text__admin">Añadir categorias y subcategorias</label>
+            <label class="text__admin">Añadir/Actualizar categorías y subcategorías</label>
             <button type="submit" class="boton boton--admin">Añadir</button>
           </div>
         </form>
@@ -47,7 +46,7 @@
           @csrf
           @method('GET')
           <div class="container__options">
-            <label class="text__admin">Añadir productos y precios</label>
+            <label class="text__admin">Añadir/Actualizar productos y precios</label>
             <button type="submit" class="boton boton--admin" onClick="">Añadir</button>
           </div>
         </form>
@@ -59,7 +58,7 @@
           @csrf
           @method('GET')
           <div class="container__options">
-            <label class="text__admin">Añadir tienda</label>
+            <label class="text__admin">Añadir/Actualizar tienda</label>
             <button type="submit" class="boton boton--admin">Añadir</button>
           </div>
         </form>
@@ -68,12 +67,14 @@
           @csrf
           @method('GET')
           <div class="container__options">
-            <label class="text__admin">Añadir precios (Para añadir los precios primero tiene que tener productos)</label>
+            <label class="text__admin">Añadir/Actualizar precios</label>
             <button type="submit" class="boton boton--admin">Añadir</button>
           </div>
         </form>
       </div>  
     </div>
+    <p class="text--attention">  <i class="bi bi-exclamation-triangle-fill"></i> Tenga en cuenta de que para crear productos, primero hay que tener categorías y una tienda. Para añadir los precios debe de haber productos antes. <i class="bi bi-exclamation-triangle-fill"></i></p>
+
     @else
     <!-- PRODUCTOS TOP -->
     <label class="title title--container">Lista de deseos</label>

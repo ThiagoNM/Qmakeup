@@ -23,7 +23,6 @@
       </div>
 
       <!-- PRODUCTOS -->
-      <div class="container__king container__king--category" >
       <div class="container container--brands">
         @php($cont = 0)
         @foreach ($productos as $producto)
@@ -33,21 +32,29 @@
           <label for="" class="title--product">{{ $producto->nombre}}</label>
           <p for="" class="text--product">{{ $producto->descripcion}}</p>
           <div class="container__starsProduct">
-            @php($ratenum = $producto->valoracion_media)
-          <div class="rating">
-            @for($i=1; $i<= $ratenum; $i++)
-              <i class="fa fa-star checked"></i>
-            @endfor
-            @for($j = $ratenum+1; $j <=5; $j++)
-              <i class="fa fa-star"></i>
-            @endfor
-          </div>
+              @php($ratenum = $producto->valoracion_media)
+            <div class="rating">
+              @for($i=1; $i<= $ratenum; $i++)
+                <i class="fa fa-star checked"></i>
+              @endfor
+              @for($j = $ratenum+1; $j <=5; $j++)
+                <i class="fa fa-star"></i>
+              @endfor
+            </div>
           </div>
           </a>
         </div>
+
         @php($cont++)
         @endforeach
+
       </div> 
-          {{ $productos->appends(request()->input())->links()}}
+
     </div> 
+
+    <div class="container__paginador">
+      {{ $productos->appends(request()->input())->links()}}
+    </div>    
+  </div>   
+
 @endsection

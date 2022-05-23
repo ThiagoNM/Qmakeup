@@ -123,3 +123,12 @@ Route::get('/filtro/{id}', [App\Http\Controllers\ProductoController::class, 'Fil
 Route::get('/subcate/{id}', [App\Http\Controllers\ProductoController::class, 'Subcategorias'])->name('subcate');
 Route::get('/wishlist/{id}',[App\Http\Controllers\WishlistController::class, 'pedro'])->name('lista');
 Route::post('/add-rating',[App\Http\Controllers\RatingController::class, 'add'])->name('add-rating');
+
+
+Route::get('/a', [App\Http\Controllers\DruniScrapingController::class, 'pageDate']);
+Route::get('/b', [App\Http\Controllers\DruniCategoriaScrapingController::class, 'category']);
+Route::get('/c', [App\Http\Controllers\LookfantasticCategoriaScrapingController::class, 'category']);
+Route::get('/d', [App\Http\Controllers\LookfantasticScrapingController::class, 'productsCategory']);
+
+
+

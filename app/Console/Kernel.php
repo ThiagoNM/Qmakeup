@@ -27,13 +27,39 @@ class Kernel extends ConsoleKernel
         $schedule->call(function(){
             echo('Ejecutando ....');
             
-            $client = new Client();
+            // Tienda Druni
+            // Recogemos el controlador para scrapear la tienda y las categorias de ella
+            echo "Tienda Druni";
+
+            $tiendaDruni = new DruniScrapingController();
+
+            echo('Ejecutando CostData.');
+            // Primero ejecutamos el shippingCostData para scrapear los datos de la tienda (nombre, gastos de envios, gastos minimos)
+            $tiendaDruni->shippingCostData($client);
+            echo('Terminado CostData.');
+
+            echo('Categorias Druni');
+            // Segundo recogemos el controlador para scrapear la tienda y las categorias de ella
+            $categoriasDruni = new DruniCategoriaScrapingController();
+            echo('Saliendo de categorias Druni');
+
+            // Tercero añadimos a la base de datos las categorias que contiene cada tienda añadiendolo a las tablas(categoriasTienda y subcategoriasTienda)
+            echo('Ejecutando Category.');
+            $categoriasDruni->category($client);
+            echo('Terminado Category.');
+
+            echo('Ejecutando Productos.');
+            // Cuarto ejecutamos el productsCategory para scrapear los productos de la tienda generando (precios)
+            $tiendaDruni->pageDate($client);
+            echo('Terminado Productos.');
+
+
 
             // Tienda Lookfantastic
             // Recogemos el controlador para scrapear la tienda y las categorias de ella
 
             $tiendaLook = new LookfantasticScrapingController();
-            echo "Tienda";
+            echo "Tienda Look";
 
             echo('Ejecutando CostData.');
             // Primero ejecutamos el shippingCostData para scrapear los datos de la tienda (nombre, gastos de envios, gastos minimos)
